@@ -1,10 +1,10 @@
 // frontend/src/App.js
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import ChatBot from '../components/ChatBot';
-import ChatHistory from '../components/ChatHistory';
+import ChatBot from './components/ChatBot';
+import ChatHistory from './components/ChatHistory';
 // Assume API endpoint is accessible via relative path or environment variable
-const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || 'http://localhost:3000/api/chat';
+const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || 'http://localhost:3001/api/chat';
 
 function App() {
     const [messages, setMessages] = useState([]);

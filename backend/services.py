@@ -3,11 +3,12 @@
 
 import os
 import requests
+import json
 from datetime import datetime
 
 # --- Configuration ---
-OLLAMA_API_URL = os.environ.get('OLLAMA_API_URL', 'http://localhost:11434/api/chat')
-OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'llama2')
+OLLAMA_API_URL = os.environ.get('OLLAMA_API_URL', 'http://localhost:11434/api/generate')
+OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'gemma4:e4b')
 
 # NOTE: Knowledge base structures (FAQS, Products) should ideally be loaded from a centralized config or database.
 # For now, we simulate loading the structure from the original knowledgeBase JS object.
@@ -20,8 +21,8 @@ class KnowledgeBase:
             {"keywords": ["giao hàng", "ship"], "answer": "Chúng tôi giao hàng toàn quốc, mất khoảng 3-5 ngày làm việc tùy khu vực."}
         ]
         self.products = [
-            {"name": "Áo Thun Cá Tính", "sku": "AT001", "description": "Áo thun chất liệu cotton cao cấp, nhiều màu sắc.", "price": "250.000"},
-            {"name": "Quần Jeans Slim", "sku": "QJ002", "description": "Quần jeans co giãn, phù hợp với nhiều dịp.", "price": "450.000"}
+            {"name": "Áo Thun Cá Tính", "sku": "AT001", "description": "Áo thun chất liệu cotton cao cấp, nhiều màu sắc.", "price": "250.000", "keywords": ["áo thun", "áo", "áo thun cá tính"]},
+            {"name": "Quần Jeans Slim", "sku": "QJ002", "description": "Quần jeans co giãn, phù hợp với nhiều dịp.", "price": "450.000", "keywords": ["quần jeans", "quần", "jeans"]}
         ]
 
 KNOWLEDGE_BASE = KnowledgeBase()
@@ -85,13 +86,15 @@ def process_chat_request(message_text, sender_id, platform):
                     ) % knowledge_context
     
     # 3. Construct the payload for the LLM API
-    payload = {
-        "model": OLLAMA_MODEL,
-        "messages": [
+    prompt = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": message_text}
-        ],
-        "temperature": 0.7
+        ]
+    prompt_txt = json.dumps(prompt, ensure_ascii=False)
+    payload = {
+        "model": OLLAMA_MODEL,
+        "prompt": prompt_txt,
+        "stream": False
     }
     
     try:

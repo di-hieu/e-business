@@ -16,3 +16,4 @@ Thumbs.db
 .env
 .vscode/
 /systemd/
+__pycache__/
