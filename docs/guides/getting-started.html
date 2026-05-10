@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Getting Started - SC Chatbot</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; margin-bottom: 20px; }
+        header h1 { font-size: 2rem; }
+        a { color: #667eea; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .card { background: white; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { color: #667eea; margin-bottom: 15px; }
+        h3 { color: #764ba2; margin: 25px 0 10px 0; }
+        pre { background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; }
+        code { font-family: 'Courier New', monospace; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-top: 10px; }
+        .badge-poc { background: #e3f2fd; color: #1976d2; }
+        .badge-mvp { background: #f3e5f5; color: #7b1fa2; }
+        .badge-planned { background: #fff3e0; color: #f57c00; }
+        .badge-done { background: #c8e6c9; color: #2e7d32; }
+        .back-link { display: inline-block; background: #667eea; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; margin-bottom: 20px; }
+        ol, ul { margin-left: 20px; margin-top: 10px; }
+        li { margin-bottom: 8px; }
+        .tip { background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #9c27b0; }
+        .warning { background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #f57c00; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🚀 Getting Started with SC Chatbot</h1>
+    </header>
+    <div class="container">
+        <a href="../table-of-contents.html" class="back-link">← Back to Documentation</a>
+        
+        <div class="card">
+            <h2>Overview</h2>
+            <p>Welcome to SC Chatbot - a production-ready, multi-tenant AI chatbot platform for SMEs. This guide will help you set up and run the platform locally for development and testing.</p>
+            <span class="badge badge-poc">POC Ready</span>
+        </div>
+
+        <div class="card">
+            <h2>System Requirements</h2>
+            <h3>Hardware</h3>
+            <ul>
+                <li><strong>RAM:</strong> Minimum 4GB (8GB recommended)</li>
+                <li><strong>CPU:</strong> 2+ cores (4+ recommended)</li>
+                <li><strong>Disk:</strong> 10GB free space (SSD recommended)</li>
+            </ul>
+            
+            <h3>Software</h3>
+            <ul>
+                <li><strong>Python:</strong> 3.11 or higher</li>
+                <li><strong>Docker:</strong> Engine 20.10+ and Compose v2+</li>
+                <li><strong>Git:</strong> Version control for cloning repository</li>
+                <li><strong>npm/node.js:</strong> 18+ (for frontend development)</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>Installation Steps</h2>
+            <h3>Step 1: Clone the Repository</h3>
+            <pre><code># Clone the repository
+git clone https://github.com/di-hieu/e-business.git
+cd e-business
+
+# Install Python dependencies
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Install frontend dependencies
+cd src/frontend
+npm install
+cd ../..</code></pre>
+            
+            <h3>Step 2: Configure Environment</h3>
+            <pre><code># Copy environment template
+cp .env.example .env
+
+# Edit environment variables
+nano .env
+# or
+vim .env
+# or
+code .env</code></pre>
+            
+            <h3>Required Environment Variables</h3>
+            <pre><code># LLM API Configuration
+OPENAI_API_KEY=your_openai_api_key_here
+LITELLM_MODELS=gpt-4o-mini,gpt-4o
+
+# Optional: OpenRouter for multi-provider support
+OPEN_ROUTER_API_KEY=your_openrouter_api_key_here
+
+# Database Configuration
+DATABASE_URL=sqlite:///./data/chatbot.db
+FAISS_DIR=/app/data/faiss
+
+# Application Settings
+LOG_LEVEL=INFO
+MAX_CONCURRENT_MESSAGES=100
+WEBSOCKET_HEARTBEAT_INTERVAL=30
+
+# Zalo OA Configuration (leave empty for now)
+ZALO_CLIENT_ID=
+ZALO_CLIENT_SECRET=
+ZALO_SIGNATURE_KEY=
+
+# Facebook Configuration
+FACEBOOK_APP_ID=
+FACEBOOK_APP_SECRET=</code></pre>
+            
+            <div class="tip">💡 <strong>Tip:</strong> Get your OpenAI API key from https://platform.openai.com/api-keys. For POC testing, you can use OpenRouter which supports multiple LLM providers at competitive pricing.</div>
+        </div>
+
+        <div class="card">
+            <h2>Starting the Application</h2>
+            <h3>Using Docker Compose</h3>
+            <pre><code># Build and start all services
+docker compose up -d --build
+
+# View logs
+docker compose logs -f backend
+
+# Stop containers
+docker compose down
+
+# Restart specific service
+docker compose up -d backend
+
+# Run backend in foreground (for debugging)
+docker compose up backend</code></pre>
+            
+            <h3>Access Points</h3>
+            <ul>
+                <li><strong>Backend API (Swagger UI):</strong> http://localhost:8000/docs</li>
+                <li><strong>Frontend Application:</strong> http://localhost:3000</li>
+                <li><strong>Health Check:</strong> http://localhost:8000/health</li>
+            </ul>
+            
+            <div class="warning">⚠️ <strong>Note:</strong> The backend needs an API key configured before it can process requests. Start the backend with docker compose up to initialize the SQLite database and set up basic endpoints.</div>
+        </div>
+
+        <div class="card">
+            <h2>Manual Local Setup (Without Docker)</h2>
+            <h3>For Development with Python Debugger</h3>
+            <pre><code><span class="code"># Activate virtual environment
+source venv/bin/activate
+
+# Run backend with Uvicorn
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
+# Run frontend development server
+cd src/frontend
+npm run dev
+
+# Run tests
+pytest src/backend/tests</code></pre>
+            
+            <h3>Testing the API</h3>
+            <pre><code><span class="code"># Health check
+curl http://localhost:8000/health
+
+# Chat endpoint (test with a sample message)
+curl -X POST "http://localhost:8000/chat/messages" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{"messages": [{"role": "user", "content": "Hello"}]}'</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Project Structure</h2>
+            <pre><code>e-business/
+├── src/
+│   ├── backend/          # FastAPI backend
+│   │   ├── main.py       # Main FastAPI application
+│   │   ├── models/       # SQLAlchemy models
+│   │   ├── services/     # Business logic
+│   │   ├── routers/      # API endpoints
+│   │   └── utils/        # Utility functions
+│   └── frontend/         # React application
+│       ├── src/
+│       │   ├── components/
+│       │   ├── pages/
+│       │   └── App.jsx
+├── docs/                 # Documentation
+├── data/                 # Data directory (volumes)
+├── logs/                 # Log files
+├── .env.example          # Environment template
+├── docker-compose.yml    # Docker Compose config
+└── Makefile              # Build automation</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Understanding the Architecture</h2>
+            <h3>Component Overview</h3>
+            <ul>
+                <li><strong>Backend API:</strong> FastAPI service handling WebSocket connections, REST APIs, and AI processing</li>
+                <li><strong>Frontend:</strong> React application for admin dashboard and chat interface</li>
+                <li><strong>SQLite Database:</strong> Stores conversations, users, and settings</li>
+                <li><strong>FAISS:</strong> Vector store for RAG-based retrieval</li>
+            </ul>
+            
+            <h3>Data Flow</h3>
+            <pre><code>User Message → WebSocket → Backend Router → LangChain Chain
+                                                        ↓
+                                               Vector DB (FAISS) → Retrieved Context
+                                                        ↓
+                                                      LLM → Response</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Common Commands</h2>
+            <pre><code><span class="code"># Development
+docker compose up -d                    # Start all services
+docker compose logs -f                  # Follow logs
+docker compose exec backend bash        # Access backend container
+
+# Testing
+pytest src/backend/tests                # Run tests
+pytest --cov=src/backend                # With coverage
+
+# Database
+docker compose exec backend sqlite3 data/chatbot.db
+
+# Backend Debug
+docker compose exec backend python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Troubleshooting</h2>
+            <h3>Common Issues</h3>
+            
+            <h4>Container Won't Start</h4>
+            <pre><code><span class="code"># Check Docker logs
+docker compose logs
+
+# Check for errors
+docker compose logs --tail=100
+
+# Rebuild containers
+docker compose down
+docker compose up -d --build</code></pre>
+            
+            <h4>Database Not Found</h4>
+            <pre><code><span class="code"># Ensure data directory exists
+mkdir -p data
+
+# Check permissions
+chmod -R 755 data</code></pre>
+            
+            <h4>LLM Connection Failed</h4>
+            <pre><code><span class="code"># Verify API key
+echo $OPENAI_API_KEY
+
+# Test API connection
+curl https://api.openai.com/v1/models -H "Authorization: Bearer $OPENAI_API_KEY"</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Next Steps</h2>
+            <ul>
+                <li>Check the <a href="deployment/docker.html">Docker Deployment</a> guide for production setup</li>
+                <li>Read the <a href="team/onboarding.html">Team Onboarding</a> guide for development workflows</li>
+                <li>Explore the <a href="guides/channel-integration.html">Channel Integration</a> guide for adding Zalo/Facebook support</li>
+                <li>Learn about <a href="guides/knowledge-base.html">Knowledge Base</a> management</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

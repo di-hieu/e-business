@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>First Steps Tutorial - SC Chatbot</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; margin-bottom: 20px; }
+        header h1 { font-size: 2rem; }
+        a { color: #667eea; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .card { background: white; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { color: #667eea; margin-bottom: 15px; }
+        h3 { color: #764ba2; margin: 25px 0 10px 0; }
+        pre { background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; }
+        code { font-family: 'Courier New', monospace; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-top: 10px; }
+        .badge-poc { background: #e3f2fd; color: #1976d2; }
+        .back-link { display: inline-block; background: #667eea; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; margin-bottom: 20px; }
+        .step { border-left: 4px solid #667eea; padding-left: 15px; margin: 15px 0; }
+        .tip { background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #9c27b0; }
+        .warning { background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #f57c00; }
+        ul, ol { margin-left: 20px; margin-top: 10px; }
+        li { margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📝 First Steps Tutorial</h1>
+    </header>
+    <div class="container">
+        <a href="../table-of-contents.html" class="back-link">← Back to Documentation</a>
+        
+        <div class="card">
+            <h2>Welcome to SC Chatbot</h2>
+            <p>This tutorial will help you get started with the SC Chatbot platform. We'll walk through the basic setup steps: testing the API, adding knowledge, and configuring tools.</p>
+            <span class="badge badge-poc">POC Ready</span>
+        </div>
+
+        <div class="card">
+            <h2>Prerequisites</h2>
+            <p>Before you begin, make sure you have:</p>
+            <ul>
+                <li><strong>Docker installed</strong> (or use our Makefile)</li>
+                <li><strong>Python 3.11+</strong> for development</li>
+                <li><strong>curl or HTTP client</strong> (Postman, Insomnia, etc.)</li>
+                <li><strong>API credentials</strong> for your LLM provider (OpenAI, etc.)</li>
+                <li><strong>Zalo Developer account</strong> for channel integration</li>
+            </ul>
+            
+            <h3>Starting the Local Server</h3>
+            <pre><code><span class="code"># Navigate to project directory
+cd /home/dihieu/.ws/e-business
+
+# Start with Docker Compose
+docker-compose up -d
+
+# Or start development mode
+make dev
+
+# Verify it's running
+curl http://localhost:8000/health
+
+# Expected response
+{
+    "status": "healthy",
+    "timestamp": "2024-05-10T15:30:00Z",
+    "version": "0.1.0"
+}</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Step 1: Test the Chatbot API</h2>
+            <p>The chatbot is ready to receive messages. Let's test it with a simple greeting.</p>
+            
+            <h3>Send a Greeting Message</h3>
+            <pre><code><span class="code"># Test basic chat endpoint
+curl -X POST http://localhost:8000/chat/messages \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "message": "Hello, I need help with my order",
+    "channel": "web"
+  }'
+
+# Sample response
+{
+    "conversation_id": "conv_abc123",
+    "response": "Hello! I'd be happy to help you with your order. Could you please provide your order number?",
+    "tokens_used": 45,
+    "tools_called": []
+}</code></pre>
+            
+            <h3>Understanding the Response</h3>
+            <table>
+                <tr><th>Field</th><th>Description</th></tr>
+                <tr><td><code>conversation_id</code></td><td>Unique ID for this conversation</td></tr>
+                <tr><td><code>response</code></td><td>LLM-generated response</td></tr>
+                <tr><td><code>tokens_used</code></td><td>Token count for billing</td></tr>
+                <tr><td><code>tools_called</code></td><td>List of tools used (empty for simple query)</td></tr>
+            </table>
+            
+            <h3>Testing with Different Messages</h3>
+            <pre><code><span class="code"># Product inquiry
+curl -X POST http://localhost:8000/chat/messages \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "What products do you sell?",
+    "channel": "zalo"
+  }'
+
+# Order tracking
+curl -X POST http://localhost:8000/chat/messages \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "My order has not arrived",
+    "order_id": "ORD-12345"
+  }'</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Step 2: Add Knowledge Base</h2>
+            <p>The chatbot needs knowledge to answer questions. Upload your FAQs, product manuals, or policy documents.</p>
+            
+            <h3>Upload Text Content</h3>
+            <pre><code><span class="code"># Upload FAQ content directly
+curl -X POST http://localhost:8000/knowledge/upload \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "tenant_id": "tenant123",
+    "content": "Q: How do I return an item?\\nA: Returns are accepted within 30 days of delivery.\\n\\nQ: What is the warranty period?\\nA: All products come with a 1-year warranty.",
+    "source": "manual-faq",
+    "chunk_size": 200
+  }'
+
+# Response
+{
+    "document_id": "doc_faq_001",
+    "status": "processing",
+    "chunks_created": 12,
+    "estimated_completion": "2024-05-10T15:32:00Z"
+}</code></pre>
+            
+            <h3>Upload PDF File</h3>
+            <pre><code><span class="code"># Upload product manual
+curl -X POST http://localhost:8000/knowledge/upload \
+  -H "Content-Type: multipart/form-data" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@product-manual.pdf" \
+  -F "source=product-catalog" \
+  -F "chunk_size=300"
+
+# Response
+{
+    "document_id": "doc_manual_001",
+    "filename": "product-manual.pdf",
+    "file_size": "2.5 MB",
+    "status": "processing",
+    "chunks_created": 85
+}</code></pre>
+            
+            <h3>Upload Multiple Files</h3>
+            <pre><code><span class="code"># Batch upload via API
+curl -X POST http://localhost:8000/knowledge/import \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "documents": [
+      {
+        "source": "returns-policy",
+        "text": "Our returns policy...",
+        "chunk_size": 200
+      },
+      {
+        "source": "warranty-info",
+        "text": "Warranty terms...",
+        "chunk_size": 200
+      },
+      {
+        "source": "shipping-info",
+        "text": "Shipping and delivery...",
+        "chunk_size": 200
+      }
+    ]
+  }'
+
+# Response
+[
+    {
+        "document_id": "doc_returns_001",
+        "status": "processing"
+    },
+    {
+        "document_id": "doc_warranty_001",
+        "status": "processing"
+    },
+    {
+        "document_id": "doc_shipping_001",
+        "status": "processing"
+    }
+]</code></pre>
+            
+            <h3>Verify Upload</h3>
+            <pre><code><span class="code"># List all documents
+curl http://localhost:8000/knowledge \
+  -H "Authorization: Bearer YOUR_API_KEY"
+
+# Response
+[
+    {
+        "document_id": "doc_faq_001",
+        "source": "manual-faq",
+        "chunks": 12,
+        "created_at": "2024-05-10T15:30:00Z",
+        "status": "completed"
+    },
+    {
+        "document_id": "doc_manual_001",
+        "source": "product-catalog",
+        "chunks": 85,
+        "created_at": "2024-05-10T15:31:00Z",
+        "status": "completed"
+    }
+]</code></pre>
+            
+            <div class="tip">💡 <strong>Tip:</strong> Chunk size affects how questions are answered. Use smaller chunks (200) for FAQs, larger chunks (500+) for long documents.</div>
+        </div>
+
+        <div class="card">
+            <h2>Step 3: Configure Tools</h2>
+            <p>Define custom tools that the chatbot can use to perform actions like checking inventory or tracking orders.</p>
+            
+            <h3>Define a Tool</h3>
+            <pre><code><span class="code"># Define check_inventory tool
+curl -X POST http://localhost:8000/tools/define \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TENANT_ADMIN_TOKEN" \
+  -d '{
+    "tool_id": "check_inventory",
+    "name": "check_inventory",
+    "description": "Check product availability and pricing by region",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "sku": {
+          "type": "string",
+          "description": "Product SKU to check"
+        },
+        "region": {
+          "type": "string",
+          "enum": ["VN", "US", "EU", "APAC"],
+          "description": "Target market region"
+        }
+      },
+      "required": ["sku", "region"]
+    },
+    "endpoint": "https://oms.example.com/api/v1/inventory/check",
+    "method": "GET",
+    "auth_header": "X-API-Key",
+    "auth_value": "{{OMS_API_KEY}}"
+  }'
+
+# Response
+{
+    "tool_id": "check_inventory",
+    "name": "check_inventory",
+    "status": "active",
+    "created_at": "2024-05-10T15:35:00Z"
+}</code></pre>
+            
+            <h3>Define Track Order Tool</h3>
+            <pre><code><span class="code"># Define track_order tool
+curl -X POST http://localhost:8000/tools/define \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tool_id": "track_order",
+    "name": "track_order",
+    "description": "Track order status and estimated delivery date",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "description": "Customer order number (e.g., ORD-12345)"
+        }
+      },
+      "required": ["order_id"]
+    },
+    "endpoint": "https://oms.example.com/api/v1/orders/{order_id}",
+    "method": "GET",
+    "auth_header": "Authorization",
+    "auth_value": "Bearer {{TENANT_API_KEY}}"
+  }'
+
+# Response
+{
+    "tool_id": "track_order",
+    "name": "track_order",
+    "status": "active"
+}</code></pre>
+            
+            <h3>Define Booking Tool</h3>
+            <pre><code><span class="code"># Define book_tour tool
+curl -X POST http://localhost:8000/tools/define \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tool_id": "book_tour",
+    "name": "book_tour",
+    "description": "Check availability and book a tour",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "tour_id": {
+          "type": "string",
+          "description": "Tour identifier (e.g., TOUR-VN-001)"
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "Tour date (YYYY-MM-DD)"
+        },
+        "participants": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50,
+          "description": "Number of participants"
+        }
+      },
+      "required": ["tour_id", "date", "participants"]
+    },
+    "endpoint": "https://api.example.com/tours/book",
+    "method": "POST",
+    "auth": "bearer"
+  }'</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Step 4: Configure Zalo Integration (Optional)</h2>
+            <p>If you want to use Zalo as a messaging channel, follow these steps:</p>
+            
+            <h3>Register Zalo Developer Account</h3>
+            <ol>
+                <li>Visit <a href="https://open.zalo.me" target="_blank">https://open.zalo.me</a></li>
+                <li>Fill in your business information</li>
+                <li>Create a Zalo Official Account (OA)</li>
+                <li>Get your API credentials (Client ID, Secret)</li>
+            </ol>
+            
+            <h3>Setup Webhooks</h3>
+            <pre><code><span class="code"># Register Zalo webhook
+curl -X POST https://api.zalo.me/v2/webhook/register \
+  -H "Authorization: Basic BASE64(CLIENT_ID:CLIENT_SECRET)" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "callback_url": "http://localhost:8000/webhooks/zalo",
+    "subscribe": ["message.receive", "message.status"]
+  }'
+
+# Response
+{
+    "webhook_id": "wh_abc123",
+    "callback_url": "http://localhost:8000/webhooks/zalo",
+    "status": "active"
+}</code></pre>
+            
+            <h3>Configure in Admin Dashboard</h3>
+            <ol>
+                <li>Go to Admin Dashboard</li>
+                <li>Navigate to Settings → Channels</li>
+                <li>Enable Zalo Official Account</li>
+                <li>Enter API credentials</li>
+                <li>Test connection</li>
+            </ol>
+        </div>
+
+        <div class="card">
+            <h2>Step 5: View Analytics</h2>
+            <p>Monitor your chatbot's performance through the API:</p>
+            
+            <h3>Get Usage Statistics</h3>
+            <pre><code><span class="code"># Get analytics for tenant
+curl http://localhost:8000/analytics \
+  -H "Authorization: Bearer TENANT_ADMIN_TOKEN"
+
+# Response
+{
+    "tenant_id": "tenant123",
+    "period": {
+        "start": "2024-05-01T00:00:00Z",
+        "end": "2024-05-10T23:59:59Z"
+    },
+    "metrics": {
+        "total_messages": 1523,
+        "unique_users": 456,
+        "avg_response_time_ms": 1250,
+        "tokens_used": 250000,
+        "tool_calls": 890
+    },
+        "top_tools": [
+            {
+                "name": "check_inventory",
+                "calls": 450
+            },
+            {
+                "name": "track_order",
+                "calls": 320
+            }
+        ]
+    }
+}</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Next Steps</h2>
+            <ul>
+                <li><a href="../guides/channel-integration.html">Learn about channel integration</a></li>
+                <li><a href="../guides/function-calling.html">Explore function calling</a></li>
+                <li><a href="../guides/knowledge-base.html">Manage knowledge base</a></li>
+                <li><a href="../deployment/docker.html">Deploy to production</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

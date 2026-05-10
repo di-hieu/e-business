@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Onboarding - SC Chatbot</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; margin-bottom: 20px; }
+        header h1 { font-size: 2rem; }
+        a { color: #667eea; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .card { background: white; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { color: #667eea; margin-bottom: 15px; }
+        h3 { color: #764ba2; margin: 25px 0 10px 0; }
+        pre { background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; }
+        code { font-family: 'Courier New', monospace; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-top: 10px; }
+        .badge-poc { background: #e3f2fd; color: #1976d2; }
+        .back-link { display: inline-block; background: #667eea; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; margin-bottom: 20px; }
+        ul, ol { margin-left: 20px; margin-top: 10px; }
+        li { margin-bottom: 8px; }
+        .tip { background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #9c27b0; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>👥 Team Onboarding</h1>
+    </header>
+    <div class="container">
+        <a href="../table-of-contents.html" class="back-link">← Back to Documentation</a>
+        
+        <div class="card">
+            <h2>Welcome to SC Chatbot Team</h2>
+            <p>This guide covers team roles, responsibilities, and how to get started contributing to the project.</p>
+            <span class="badge badge-poc">POC Ready</span>
+        </div>
+
+        <div class="card">
+            <h2>Team Structure</h2>
+            <p>The SC Chatbot project operates with three main user roles, each with different permissions and responsibilities:</p>
+            
+            <h3>Super Admin</h3>
+            <ul>
+                <li><strong>Responsibilities:</strong> System-wide management, tenant onboarding, global settings</li>
+                <li><strong>Access:</strong> Full system access across all tenants</li>
+                <li><strong>Tools:</strong> Tenant management, API key management, analytics dashboard</li>
+                <li><strong>Typical Users:</strong> Company founders, platform administrators</li>
+            </ul>
+            
+            <h3>Tenant Admin</h3>
+            <ul>
+                <li><strong>Responsibilities:</strong> Manage their own tenant, configure knowledge base, set up tools</li>
+                <li><strong>Access:</strong> Full access within their tenant</li>
+                <li><strong>Tools:</strong> Knowledge upload, tool configuration, channel setup</li>
+                <li><strong>Typical Users:</strong> SME business owners, customer service managers</li>
+            </ul>
+            
+            <h3>Agent</h3>
+            <ul>
+                <li><strong>Responsibilities:</strong> Handle customer conversations</li>
+                <li><strong>Access:</strong> Limited to assigned tenant</li>
+                <li><strong>Tools:</strong> Conversation viewer, manual responses, escalation workflows</li>
+                <li><strong>Typical Users:</strong> Customer service representatives, support staff</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>Contribution Guidelines</h2>
+            <p>When contributing to the SC Chatbot project, please follow these guidelines:</p>
+            
+            <h3>Code Style (Python)</h3>
+            <ul>
+                <li><strong>PEP 8:</strong> Follow <a href="https://pep8.org" target="_blank">PEP 8</a> style guide</li>
+                <li><strong>Linting:</strong> Use <code>flake8</code> for linting</li>
+                <li><strong>Formatting:</strong> Use <code>black</code> for code formatting</li>
+                <li><strong>Type hints:</strong> Use type hints for better IDE support</li>
+                <li><strong>Docstrings:</strong> Use Google-style docstrings</li>
+            </ul>
+            
+            <pre><code><span class="code"># Example Python code style
+from typing import Optional, List
+import asyncio
+
+class ChatbotService:
+    """Service for managing chatbot conversations."""
+    
+    def __init__(
+        self,
+        tenant_id: str,
+        api_key: Optional[str] = None
+    ) -> None:
+        self.tenant_id = tenant_id
+        self.api_key = api_key
+    
+    async def send_message(
+        self,
+        user_id: str,
+        message: str
+    ) -> dict:
+        """Send a message to a user.
+        
+        Args:
+            user_id: The recipient's user ID
+            message: The message content to send
+            
+        Returns:
+            Response from the API
+        """
+        # Implementation here
+        pass</code></pre>
+            
+            <h3>Testing Requirements</h3>
+            <ul>
+                <li><strong>Unit tests:</strong> Write pytest tests for all functions</li>
+                <li><strong>Coverage:</strong> Maintain >70% coverage</li>
+                <li><strong>Async tests:</strong> Use <code>pytest-asyncio</code> for async code</li>
+                <li><strong>Integration tests:</strong> Test API endpoints</li>
+            </ul>
+            
+            <h3>Commit Messages</h3>
+            <ul>
+                <li><strong>Conventional commits:</strong> Use <code>feat:</code>, <code>fix:</code>, <code>docs:</code></li>
+                <li><strong>Descriptive:</strong> Explain what changed and why</li>
+                <li><strong>Format:</strong> <code>type(scope): description</code></li>
+            </ul>
+            
+            <pre><code><span class="code"># Good commit messages
+feat(knowledge): add PDF parsing support
+fix(chat): handle rate limit errors gracefully
+docs(api): update /mcp/query endpoint documentation
+test(tools): add unit tests for tool invocation
+refactor(llm): optimize prompt caching strategy
+chore(deps): bump fastapi from 0.100.0 to 0.104.0</code></pre>
+            
+            <h3>Branch Workflow</h3>
+            <ol>
+                <li>Create feature branch from <code>main</code></li>
+                <li>Make changes and write tests</li>
+                <li>Update documentation</li>
+                <li>Submit pull request to <code>main</code></li>
+                <li>Get code review and approval</li>
+                <li>Merge to <code>main</code></li>
+            </ol>
+            
+            <pre><code><span class="code"># Branch naming convention
+# feat: new-feature-name (max 50 chars)
+# fix: bug-fix-description
+# docs: documentation-update
+# test: add-tests-or-fix-tests
+# refactor: code-structure-change
+# chore: build-system-or-deps
+# perf: performance-improvement
+# ci: continuous-integration
+</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Development Setup</h2>
+            <p>Follow these steps to set up your development environment:</p>
+            
+            <h3>1. Install Prerequisites</h3>
+            <ul>
+                <li><strong>Python 3.11+</strong>: <code>python --version</code></li>
+                <li><strong>Git</strong>: For version control</li>
+                <li><strong>Make</strong>: For Makefile targets</li>
+                <li><strong>Docker</strong>: For containerized development</li>
+            </ul>
+            
+            <h3>2. Clone Repository</h3>
+            <pre><code><span class="code"># Clone the repository
+git clone git@github.com:di-hieu/e-business.git
+cd e-business
+
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # Linux/Mac
+# venv\Scripts\activate   # Windows
+
+# Install dependencies
+make install-dev
+
+# Run tests
+make test</code></pre>
+            
+            <h3>3. Run Development Server</h3>
+            <pre><code><span class="code"># Development mode with hot reload
+make dev
+
+# Or use Docker Compose
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop development
+make stop</code></pre>
+            
+            <h3>4. Configure Environment</h3>
+            <pre><code><span class="code"># Copy example environment file
+cp .env.example .env
+
+# Edit with your credentials
+vim .env
+
+# Required variables:
+# OPENAI_API_KEY=your_openai_api_key
+# LITELLM_MODE=pass_through
+# ZALO_CLIENT_ID=zalo_client_id
+# ZALO_CLIENT_SECRET=zalo_client_secret</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Project Structure</h2>
+            <p>Understanding the project structure helps you know where to make changes:</p>
+            
+            <pre><code><span class="code">e-business/
+├── src/
+│   ├── backend/              # FastAPI backend
+│   │   ├── api/             # API routes
+│   │   ├── models/          # SQLAlchemy models
+│   │   ├── services/        # Business logic
+│   │   ├── tools/           # Function calling tools
+│   │   └── utils/           # Utility functions
+│   └── frontend/            # React + Vite frontend
+│       ├── src/
+│       │   ├── components/
+│       │   ├── pages/
+│       │   └── services/
+├── docs/                    # Documentation
+│   ├── api-reference/
+│   ├── architecture/
+│   ├── guides/
+│   ├── team/                # This folder
+│   └── tutorials/
+├── ci/                      # CI/CD configuration
+├── docker/                  # Docker files
+├── tests/                   # Test files
+└── Makefile                 # Build automation</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Code Review Process</h2>
+            <p>All contributions go through a code review process:</p>
+            
+            <h3>Review Checklist</h3>
+            <ul>
+                <li>Code follows PEP 8 style</li>
+                <li>Tests cover new functionality</li>
+                <li>Documentation is updated</li>
+                <li>No sensitive data in code</li>
+                <li>Changes are minimal and focused</li>
+            </ul>
+            
+            <h3>Review Guidelines</h3>
+            <ul>
+                <li>Be constructive and specific</li>
+                <li>Ask questions rather than make statements</li>
+                <li>Focus on code quality, not personal preference</li>
+                <li>Respectful and professional communication</li>
+            </ul>
+            
+            <div class="tip">💡 <strong>Tip:</strong> Small, focused PRs get reviewed faster. Breaking changes should be discussed before implementation.</div>
+        </div>
+
+        <div class="card">
+            <h2>Next Steps</h2>
+            <ul>
+                <li><a href="security.html">Review security best practices</a></li>
+                <li><a href="../monitoring.html">Learn about monitoring setup</a></li>
+                <li><a href="../guides/getting-started.html">Read the getting started guide</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

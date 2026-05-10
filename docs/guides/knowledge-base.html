@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Base - SC Chatbot</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; margin-bottom: 20px; }
+        header h1 { font-size: 2rem; }
+        a { color: #667eea; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .card { background: white; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { color: #667eea; margin-bottom: 15px; }
+        h3 { color: #764ba2; margin: 25px 0 10px 0; }
+        pre { background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; }
+        code { font-family: 'Courier New', monospace; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-top: 10px; }
+        .badge-poc { background: #e3f2fd; color: #1976d2; }
+        .badge-mvp { background: #f3e5f5; color: #7b1fa2; }
+        .badge-planned { background: #fff3e0; color: #f57c00; }
+        .badge-done { background: #c8e6c9; color: #2e7d32; }
+        .back-link { display: inline-block; background: #667eea; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; margin-bottom: 20px; }
+        ul, ol { margin-left: 20px; margin-top: 10px; }
+        li { margin-bottom: 8px; }
+        .tip { background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #9c27b0; }
+        .warning { background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #f57c00; }
+        .table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        .table th, .table td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        .table th { background: #667eea; color: white; }
+        .workflow-step { display: flex; gap: 20px; margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; }
+        .workflow-step .step-num { background: #667eea; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; flex-shrink: 0; }
+        .workflow-step .step-content { flex: 1; }
+        .workflow-step h5 { color: #764ba2; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📚 Knowledge Base Management</h1>
+    </header>
+    <div class="container">
+        <a href="../table-of-contents.html" class="back-link">← Back to Documentation</a>
+        
+        <div class="card">
+            <h2>Overview</h2>
+            <p>The knowledge base is the core of the SC Chatbot's AI capabilities. It stores documents, FAQs, and product information that the chatbot uses to generate context-aware responses using RAG (Retrieval-Augmented Generation).</p>
+            <span class="badge badge-planned">Planned</span>
+        </div>
+
+        <div class="card">
+            <h2>What is a Knowledge Base?</h2>
+            <p>A knowledge base is a structured collection of information that the chatbot can access and use to answer user queries. The system processes this information using RAG to provide accurate, fact-based responses.</p>
+            
+            <h3>Types of Documents</h3>
+            <table>
+                <tr><th>Type</th><th>Supported Formats</th><th>Use Case</th></tr>
+                <tr><td><strong>FAQs</strong></td><td>JSON, CSV, Text</td><td>Customer support questions</td></tr>
+                <tr><td><strong>Product Catalog</strong></td><td>PDF, Excel</td><td>Product information and pricing</td></tr>
+                <tr><td><strong>Policy Documents</strong></td><td>PDF, DOCX</td><td>Return policies, terms of service</td></tr>
+                <tr><td><strong>Website Content</strong></td><td>URL crawling</td><td>Dynamic content updates</td></tr>
+                <tr><td><strong>Manuals</strong></td><td>PDF</td><td>Product setup and troubleshooting</td></tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>RAG Pipeline Overview</h2>
+            <p>The RAG (Retrieval-Augmented Generation) pipeline enables the chatbot to answer questions from your knowledge base without retraining the model.</p>
+            
+            <h3>How RAG Works</h3>
+            <div class="workflow-step">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <h5>Chunking</h5>
+                    <p>Documents are split into ~300-token chunks with 50-token overlap. Each chunk becomes a searchable unit.</p>
+                </div>
+            </div>
+            
+            <div class="workflow-step">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <h5>Embedding</h5>
+                    <p>Each chunk is converted to a 384-dimensional vector using the embedding model (all-MiniLM-L6-v2 in POC, OpenAI text-embedding-3-small in production).</p>
+                </div>
+            </div>
+            
+            <div class="workflow-step">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <h5>Storage</h5>
+                    <p>Vector embeddings are stored in FAISS (POC) or Qdrant (production), indexed for fast similarity search.</p>
+                </div>
+            </div>
+            
+            <div class="workflow-step">
+                <div class="step-num">4</div>
+                <div class="step-content">
+                    <h5>Retrieval</h5>
+                    <p>When a user asks a question, it's embedded and used to search for the most similar chunks (top-k).</p>
+                </div>
+            </div>
+            
+            <div class="workflow-step">
+                <div class="step-num">5</div>
+                <div class="step-content">
+                    <h5>Generation</h5>
+                    <p>Retrieved chunks are injected into the LLM prompt as context, and the model generates a grounded response.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Document Chunking Strategy</h2>
+            <p>Chunking is critical for RAG performance. The system splits documents into manageable pieces while preserving context.</p>
+            
+            <h3>Chunk Size Options</h3>
+            <table>
+                <tr><th>Chunk Size</th><th>Overlap</th><th>Best For</th></tr>
+                <tr><td><strong>200 tokens</strong></td><td>20 tokens</td><td>Short documents, FAQs</td></tr>
+                <tr><td><strong>300 tokens</strong></td><td>50 tokens</td><td>General use (default)</td></tr>
+                <tr><td><strong>500 tokens</strong></td><td>100 tokens</td><td>Long articles, manuals</td></tr>
+            </table>
+            
+            <h3>Semantic Chunking</h3>
+            <p>Advanced chunking uses sentence boundaries and semantic similarity to create more coherent chunks:</p>
+            <pre><code><span class="code"># Semantic chunking with sentence splits
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=300,
+    chunk_overlap=50,
+    separators=["\n\n", "\n", " ", ""],
+    length_function=len
+)
+
+chunks = text_splitter.split_text(documents)</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Upload Documents</h2>
+            <h3>Via Admin Dashboard</h3>
+            <ol>
+                <li>Navigate to Knowledge Base section</li>
+                <li>Click "Upload Document"</li>
+                <li>Select file (PDF, CSV, TXT)</li>
+                <li>Choose source name and chunk settings</li>
+                <li>Click "Upload"</li>
+                <li>Wait for processing (embeddings are generated)</li>
+            </ol>
+            
+            <h3>Via API</h3>
+            <pre><code><span class="code"># Upload single file
+curl -X POST http://localhost:8000/api/tenants/tenant123/knowledge/upload \
+  -H "Authorization: Bearer TENANT_API_KEY" \
+  -F "file=@faq.pdf" \
+  -F "source=documentation" \
+  -F "chunk_size=300" \
+  -F "chunk_overlap=50"
+
+# Response
+{
+    "document_id": "doc_abc123",
+    "source": "documentation",
+    "status": "processing",
+    "chunks_created": 45,
+    "created_at": "2024-01-15T10:30:00Z"
+}</code></pre>
+            
+            <h3>Upload Multiple Files</h3>
+            <pre><code><span class="code"># Upload batch via API
+curl -X POST http://localhost:8000/api/tenants/tenant123/knowledge/import \
+  -H "Authorization: Bearer TENANT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "documents": [
+      {
+        "source": "product-catalog",
+        "file": "@catalog.xlsx",
+        "chunk_size": 200
+      },
+      {
+        "source": "faq",
+        "text": "Q: How do I reset my password?\\nA: Go to settings...",
+        "chunk_size": 200
+      }
+    ]
+  }'</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Web Crawler (Planned)</h2>
+            <p>The system can automatically crawl websites to extract content. This is useful for keeping product information up-to-date without manual uploads.</p>
+            
+            <h3>Crawler Configuration</h3>
+            <pre><code><span class="code"># Crawler settings
+curl -X POST http://localhost:8000/api/tenants/tenant123/crawler/config \
+  -H "Authorization: Bearer TENANT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://example.com/products",
+    "selector": ".product-card",
+    "interval": "daily",
+    "max_pages": 100,
+    "exclude_patterns": ["/admin", "/login"]
+  }'</code></pre>
+            
+            <h3>Crawled Content Structure</h3>
+            <table>
+                <tr><th>Field</th><th>Description</th></tr>
+                <tr><td><strong>url</strong></td><td>Source URL to crawl</td></tr>
+                <tr><td><strong>selector</strong></td><td>CSS selector for product content</td></tr>
+                <tr><td><strong>interval</strong></td><td>Crawl frequency (hourly, daily, weekly)</td></tr>
+                <tr><td><strong>max_pages</strong></td><td>Maximum pages to crawl</td></tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Knowledge Base Management</h2>
+            <h3>View Knowledge Base</h3>
+            <pre><code><span class="code"># List all documents
+curl http://localhost:8000/api/tenants/tenant123/knowledge \
+  -H "Authorization: Bearer TENANT_API_KEY"
+
+# Response
+[
+  {
+    "document_id": "doc_abc123",
+    "source": "faq",
+    "chunks": 45,
+    "created_at": "2024-01-10T10:00:00Z",
+    "last_updated": "2024-01-10T10:00:00Z"
+  }
+]</code></pre>
+            
+            <h3>Update/Edit FAQ</h3>
+            <pre><code><span class="code"># Update existing FAQ entry
+curl -X POST http://localhost:8000/api/tenants/tenant123/knowledge/faqs \
+  -H "Authorization: Bearer TENANT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "How do I return an item?",
+    "answer": "Returns are accepted within 30 days of delivery.",
+    "category": "returns",
+    "priority": "high"
+  }'</code></pre>
+            
+            <h3>Delete Document</h3>
+            <pre><code><span class="code"># Delete document and its embeddings
+DELETE http://localhost:8000/api/tenants/tenant123/knowledge/{document_id}</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Embedding Model Options</h2>
+            <h3>POC: all-MiniLM-L6-v2</h3>
+            <p><strong>Pros:</strong> Free, runs locally, ~50MB size<br>
+<strong>Cons:</strong> Smaller than OpenAI embeddings, slower</p>
+            
+            <h3>Production: OpenAI text-embedding-3-small</h3>
+            <p><strong>Pros:</strong> Higher quality, faster cloud inference<br>
+<strong>Cons:</strong> Per-token cost (~$0.02/1k tokens)</p>
+            
+            <h3>Alternative: BGE</h3>
+            <p><strong>Pros:</strong> Excellent for Chinese languages<br>
+<strong>Cons:</strong> Larger file size</p>
+        </div>
+
+        <div class="card">
+            <h2>RAG Optimization Tips</h2>
+            <h3>Chunk Size Tuning</h3>
+            <ul>
+                <li><strong>Smaller chunks (200):</strong> Better precision for specific questions</li>
+                <li><strong>Larger chunks (500+):</strong> Better context preservation</li>
+            </ul>
+            
+            <h3>Similarity Threshold</h3>
+            <pre><code><span class="code"># Adjust minimum similarity score
+min_similarity = 0.7  # Default
+
+# For stricter filtering
+min_similarity = 0.85
+
+# For more lenient (broader context)
+min_similarity = 0.5</code></pre>
+            
+            <h3>Top-k Retrieval</h3>
+            <ul>
+                <li><strong>k=3:</strong> Focused, concise responses</li>
+                <li><strong>k=5:</strong> Balanced (recommended)</li>
+                <li><strong>k=10:</strong> Broader context, longer responses</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>Knowledge Base Best Practices</h2>
+            <h3>Document Quality</h3>
+            <ul>
+                <li><strong>Clear formatting:</strong> Use proper headers and paragraphs</li>
+                <li><strong>Concise language:</strong> Avoid unnecessary verbosity</li>
+                <li><strong>Accurate information:</strong> Ensure facts are up-to-date</li>
+            </ul>
+            
+            <h3>Regular Updates</h3>
+            <ul>
+                <li>Review and update knowledge monthly</li>
+                <li>Remove outdated documents</li>
+                <li>Add new product information promptly</li>
+            </ul>
+            
+            <h3>Metadata Tags</h3>
+            <pre><code><span class="code"># Add metadata for better filtering
+curl -X POST http://localhost:8000/api/tenants/tenant123/knowledge/tag \
+  -H "Authorization: Bearer TENANT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "document_id": "doc_abc123",
+    "tags": ["product", "returns", "customer-service"],
+    "language": "vi"
+  }'</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Next Steps</h2>
+            <ul>
+                <li><a href="deployment/docker.html">Deploy with Docker</a></li>
+                <li><a href="guides/channel-integration.html">Integrate with Zalo/Facebook</a></li>
+                <li><a href="guides/function-calling.html">Set up function calling tools</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture Overview - SC Chatbot</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; margin-bottom: 20px; }
+        header h1 { font-size: 2rem; }
+        a { color: #667eea; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .card { background: white; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { color: #667eea; margin-bottom: 15px; }
+        h3 { color: #764ba2; margin: 20px 0 10px 0; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #667eea; color: white; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-top: 10px; }
+        .badge-poc { background: #e3f2fd; color: #1976d2; }
+        .badge-planned { background: #fff3e0; color: #f57c00; }
+        .back-link { display: inline-block; background: #667eea; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; margin-bottom: 20px; }
+        .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 15px 0; }
+        .tech-box { background: #f8f9fa; padding: 15px; border-radius: 8px; }
+        .tech-box strong { color: #667eea; }
+        .tech-box .desc { font-size: 0.85rem; color: #555; margin-top: 5px; font-style: italic; }
+        .flow-diagram { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 15px 0; font-family: monospace; font-size: 0.85rem; line-height: 1.8; border: 1px dashed #ccc; }
+        .tech-reference-link { margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ddd; }
+        .tech-reference-link a { font-weight: 600; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🏛️ Architecture Overview</h1>
+    </header>
+    <div class="container">
+        <a href="../table-of-contents.html" class="back-link">← Back to Top</a>
+        
+        <div class="card">
+            <h2>System Architecture</h2>
+            <p><strong>SC Chatbot</strong> is a multi-tenant SaaS platform that provides AI-powered customer support chatbots for SMEs, with seamless integration into social commerce channels (Zalo, Facebook, Instagram).</p>
+            
+            <h3>Core Architecture Layers</h3>
+            <div class="flow-diagram">
+<pre>┌─────────────────────────────────────────────────────────────┐
+│                    Client Layer                              │
+│  Zalo App | Facebook App | Web | Mobile                     │
+└─────────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  Edge / Load Balancer                        │
+│  - SSL Termination                                           │
+│  - Rate Limiting                                             │
+│  - DDoS Protection                                           │
+└─────────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    API Gateway                                │
+│  FastAPI Backend (Python 3.11+)                             │
+│  - WebSocket for real-time messages                          │
+│  - REST endpoints for admin functions                        │
+│  - JWT authentication                                        │
+└─────────────────────────────────────────────────────────────┘
+                          │
+                ┌─────────┴─────────┐
+                │                   │
+                ▼                   ▼
+┌──────────────────────┐   ┌─────────────────────────────────┐
+│   AI Engine Layer    │   │    Function Calling Layer       │
+│   ┌────────────────┐ │   │   ┌───────────────────────────┐ │
+│   │ RAG Pipeline   │ │   │   │  Tool Registry            │ │
+│   │ - Embedding    │ │   │   │  (LLM-defined tools)      │ │
+│   │ - Retrieval    │ │   │   └───────────────────────────┘ │
+│   │ - Generation   │ │   │                                   │
+│   └────────────────┘ │   │   ┌───────────────────────────┐ │
+│                      │   │   │  MCP Server               │ │
+│                      │   │   │  (external agent access)  │ │
+│                      │   │   └───────────────────────────┘ │
+│                      │   │                                   │
+│                      │   │   ┌───────────────────────────┐ │
+│                      │   │   │  Agent Graph (LangGraph)  │ │
+│                      │   │   │  (multi-turn dialog)      │ │
+│                      │   │   └───────────────────────────┘ │
+└──────────────────────┘   └─────────────────────────────────┘
+                │                   │
+                └─────────┬─────────┘
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   Data Layer                                 │
+│   ┌──────────────────────────────────────────────┐          │
+│   │         SQLite (conversations)               │          │
+│   │         - tenant_id isolation                │          │
+│   │         - Message logs                       │          │
+│   └──────────────────────────────────────────────┘          │
+│   ┌──────────────────────────────────────────────┐          │
+│   │    FAISS (vector embeddings)                 │          │
+│   │    - Per-tenant indexes                      │          │
+│   │    - Cosine similarity search                │          │
+│   └──────────────────────────────────────────────┘          │
+│   ┌──────────────────────────────────────────────┐          │
+│   │      Knowledge Store (documents)             │          │
+│   │      - Raw document storage                   │          │
+│   └──────────────────────────────────────────────┘          │
+└─────────────────────────────────────────────────────────────┘
+</pre>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Technology Stack</h2>
+            <p>For detailed explanations of every technology choice, see the <a href="../architecture/tech-reference.html">🛠️ Technology Deep Dive</a> document.</p>
+            
+            <table>
+                <tr><th>Layer</th><th>Choice</th><th>Reason</th></tr>
+                <tr><td><strong>Backend</strong></td><td>Python 3.11+ + FastAPI</td><td>Async, fast development, auto docs</td></tr>
+                <tr><td><strong>LLM</strong></td><td>GPT-4o-mini / OpenRouter</td><td>No local setup, reliable</td></tr>
+                <tr><td><strong>Embeddings</strong></td><td>all-MiniLM-L6-v2</td><td>In-process, no external API</td></tr>
+                <tr><td><strong>Vector DB</strong></td><td>FAISS (file-based)</td><td>No separate service</td></tr>
+                <tr><td><strong>Conversation DB</strong></td><td>SQLite + aiosqlite</td><td>Single file, no server</td></tr>
+                <tr><td><strong>Frontend</strong></td><td>React + Vite + Bootstrap 5</td><td>Faster prototyping</td></tr>
+                <tr><td><strong>Deployment</strong></td><td>Docker only</td><td>Quick for pilot</td></tr>
+            </table>
+            <span class="badge badge-poc">POC</span>
+            
+            <div class="tech-reference-link">
+                <p><strong>📖 For deeper understanding of each technology:</strong></p>
+                <ul style="margin-top: 8px;">
+                    <li><a href="../architecture/tech-reference.html">🛠️ Complete Technology Deep Dive</a></li>
+                    <li><a href="../guides/getting-started.html">🚀 Getting Started Guide</a></li>
+                    <li><a href="../deployment/docker.html">🐳 Docker Deployment Guide</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Architecture Components</h2>
+            
+            <h3>FastAPI Backend</h3>
+            <div class="tech-box">
+                <strong>Async WebSocket Server</strong><br>
+                <span class="desc">Handles real-time message streams from Zalo/Facebook channels with low latency.</span>
+            </div>
+            <div class="tech-box">
+                <strong>LangChain/LangGraph Agents</strong><br>
+                <span class="desc">Orchestrate multi-turn conversations with conversation memory and tool calling.</span>
+            </div>
+            <div class="tech-box">
+                <strong>MCP Server</strong><br>
+                <span class="desc">Provides standardized API for external AI agents to query the chatbot.</span>
+            </div>
+            <div class="tech-box">
+                <strong>Zalo/Facebook Channel Adapters</strong><br>
+                <span class="desc">Pluggable adapters for different social media channels using adapter pattern.</span>
+            </div>
+            
+            <h3>Frontend Dashboard</h3>
+            <div class="tech-box">
+                <strong>React + Bootstrap 5</strong><br>
+                <span class="desc">Admin dashboard for managing tenants, knowledge base, and tools.</span>
+            </div>
+            <div class="tech-box">
+                <strong>React Context State</strong><br>
+                <span class="desc">Simple state management for dashboard navigation and settings.</span>
+            </div>
+
+            <h3>Storage Architecture</h3>
+            <div class="tech-box">
+                <strong>FAISS Vector Store</strong><br>
+                <span class="desc">Per-tenant vector indexes stored as separate .faiss files for isolation.</span>
+            </div>
+            <div class="tech-box">
+                <strong>SQLite Database</strong><br>
+                <span class="desc">Single file database with tenant_id column for logical isolation.</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Deployment Architecture</h2>
+            <p>The system is containerized using Docker, making it easy to deploy in various environments:</p>
+            
+            <div class="flow-diagram">
+<pre>Development (POC):
+  ┌──────────────────────────────┐
+  │  docker-compose.yml           │
+  │  - backend:container          │
+  │  - frontend:container         │
+  │  - sqlite:volume              │
+  │  - faiss:volume               │
+  └──────────────────────────────┘
+          │
+          ▼
+Production:
+  ┌──────────────────────────────┐
+  │  AWS ECS/EKS                  │
+  │  - Auto-scaling               │
+  │  - Multi-AZ deployment        │
+  │  - RDS PostgreSQL             │
+  │  - Redis cluster              │
+  └──────────────────────────────┘
+          │
+          ▼
+On-Premises:
+  ┌──────────────────────────────┐
+  │  .deb/.rpm packages           │
+  │  - systemd services           │
+  │  - Local PostgreSQL/Redis     │
+  └──────────────────────────────┘</pre>
+            </div>
+            
+            <span class="badge badge-planned">MVP Phase</span>
+        </div>
+    </div>
+</body>
+</html>

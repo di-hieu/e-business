@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Server API Reference - SC Chatbot</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; margin-bottom: 20px; }
+        header h1 { font-size: 2rem; }
+        a { color: #667eea; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .card { background: white; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { color: #667eea; margin-bottom: 15px; }
+        h3 { color: #764ba2; margin: 25px 0 10px 0; }
+        pre { background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; }
+        code { font-family: 'Courier New', monospace; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-top: 10px; }
+        .badge-poc { background: #e3f2fd; color: #1976d2; }
+        .badge-mvp { background: #f3e5f5; color: #7b1fa2; }
+        .badge-planned { background: #fff3e0; color: #f57c00; }
+        .badge-done { background: #c8e6c9; color: #2e7d32; }
+        .back-link { display: inline-block; background: #667eea; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; margin-bottom: 20px; }
+        .endpoint { border-left: 4px solid #667eea; padding-left: 15px; margin: 10px 0; }
+        .method-get { background: #e3f2fd; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; color: #1976d2; }
+        .method-post { background: #f3e5f5; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; color: #7b1fa2; }
+        .method-delete { background: #ffebee; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; color: #c62828; }
+        ul, ol { margin-left: 20px; margin-top: 10px; }
+        li { margin-bottom: 8px; }
+        .tip { background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #9c27b0; }
+        .warning { background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #f57c00; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🔌 MCP Server API Reference</h1>
+    </header>
+    <div class="container">
+        <a href="../table-of-contents.html" class="back-link">← Back to Documentation</a>
+        
+        <div class="card">
+            <h2>Overview</h2>
+            <p>The Model Context Protocol (MCP) server enables external AI agents to query the SC Chatbot system. External agents can use MCP to interact with the chatbot, access knowledge, call tools, and receive responses.</p>
+            <span class="badge badge-planned">Planned</span>
+        </div>
+
+        <div class="card">
+            <h2>What is MCP?</h2>
+            <p><strong>Model Context Protocol (MCP)</strong> is an open protocol designed to standardize how AI models connect to tools, data sources, and external systems. It provides:</p>
+            <ul>
+                <li><strong>Unified interface:</strong> All tools use the same JSON-RPC protocol</li>
+                <li><strong>Language-agnostic:</strong> Works with Python, JavaScript, Go, Rust, etc.</li>
+                <li><strong>Secure by default:</strong> API key authentication per tenant</li>
+                <li><strong>Streaming support:</strong> Long responses can be streamed</li>
+            </ul>
+            
+            <h3>MCP Architecture</h3>
+            <pre><code><span class="code"># MCP Server Architecture
++-------------------+
+|  External AI Agent|
+|  (Claude, GPT,   |
+|   other LLMs)     |
++-------------------+
+           |
+           | MCP JSON-RPC protocol
+           |
+           v
++-------------------+
+| MCP Server (Us)   |
+| - /mcp/query      |
+| - Auth            |
+| - Tool routing    |
++-------------------+
+           |
+           | Backend API
+           |
+           v
++-------------------+
+| FastAPI Backend   |
+| - LangChain       |
+| - Vector DB       |
+| - Tools           |
++-------------------+</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Authentication</h2>
+            <p>The MCP server uses tenant-specific API keys for authentication. Each tenant gets a unique key that must be included in the Authorization header.</p>
+            
+            <h3>Get MCP API Key</h3>
+            <pre><code><span class="code"># Super admin creates MCP API key
+curl -X POST http://localhost:8000/api/tenants/tenant123/mcp/api-key \
+  -H "Authorization: Bearer TENANT_ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+
+# Response
+{
+    "api_key": "mcp_sk_abc123def456",
+    "tenant_id": "tenant123",
+    "name": "External Agent Integration",
+    "expires_at": "2025-12-31T23:59:59Z",
+    "permissions": ["query", "tools"]
+}</code></pre>
+            
+            <h3>Usage in API Headers</h3>
+            <pre><code><span class="code"># Include API key in MCP requests
+Authorization: Bearer mcp_sk_abc123def456
+
+# Or use HTTP Basic Auth with tenant ID
+Authorization: Basic dGVuYW50MTIzOm1jc19zaz8="
+# (base64 encoded "tenant123:mcp_sk...")</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>API Endpoints</h2>
+            
+            <div class="endpoint">
+                <div class="method-post">POST</div>
+                <strong>/mcp/query</strong>
+                <p>External AI agents can query the chatbot via MCP server.</p>
+                <pre><code><span class="code"># Request Body
+{
+  "tenant_id": "tenant123",
+  "user_context": {
+    "user_id": "cust_abc123",
+    "session_id": "sess_xyz789"
+  },
+  "prompt": "What's the status of order ORD-12345?",
+  "tools": ["track_order", "get_order_details"],
+  "stream": false
+}</code></pre>
+                
+                <h3>Parameters</h3>
+                <table>
+                    <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+                    <tr><td><code>tenant_id</code></td><td>string</td><td>Tenant identifier for authorization</td></tr>
+                    <tr><td><code>user_context</code></td><td>object</td><td>User session context</td></tr>
+                    <tr><td><code>user_context.user_id</code></td><td>string</td><td>Customer identifier</td></tr>
+                    <tr><td><code>user_context.session_id</code></td><td>string</td><td>Conversation session ID</td></tr>
+                    <tr><td><code>prompt</code></td><td>string</td><td>User query to process</td></tr>
+                    <tr><td><code>tools</code></td><td>array</td><td>List of tool IDs to use</td></tr>
+                    <tr><td><code>stream</code></td><td>boolean</td><td>Enable streaming (experimental)</td></tr>
+                </table>
+                
+                <h3>Success Response</h3>
+                <pre><code><span class="code">{
+  "response": "Your order ORD-12345 is currently in transit. Expected delivery: May 20, 2024. Tracking number: VN123456789",
+  "tools_called": ["track_order", "get_order_details"],
+  "tokens_used": 450,
+  "tool_calls": [
+    {
+      "name": "track_order",
+      "arguments": {"order_id": "ORD-12345"},
+      "result": {"status": "in_transit", "eta": "2024-05-20"}
+    }
+  ]
+}</code></pre>
+                
+                <h3>Error Responses</h3>
+                <pre><code><span class="code"># 401 Unauthorized (invalid API key)
+{
+  "error": "Unauthorized",
+  "detail": "Invalid MCP API key"
+}
+
+# 400 Bad Request (missing required fields)
+{
+  "error": "Bad Request",
+  "detail": "Missing required field: tenant_id",
+  "missing_fields": ["tenant_id"]
+}
+
+# 429 Too Many Requests (rate limit)
+{
+  "error": "Too Many Requests",
+  "detail": "Rate limit exceeded. Please try again later.",
+  "retry_after": 3600
+}
+
+# 500 Internal Error
+{
+  "error": "Internal Server Error",
+  "detail": "Tool execution failed: track_order",
+  "status": "error"</code></pre>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>MCP Protocol Details</h2>
+            <p>MCP uses JSON-RPC 2.0 as its transport protocol. All requests follow this format:</p>
+            
+            <h3>JSON-RPC Request Structure</h3>
+            <pre><code><span class="code">{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "mcp/query",
+  "params": {
+    "tenant_id": "tenant123",
+    "user_context": {...},
+    "prompt": "..."
+  }
+}</code></pre>
+            
+            <h3>JSON-RPC Response Structure</h3>
+            <pre><code><span class="code">// Success
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "response": "..."
+  }
+}
+
+// Error
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "error": {
+    "code": -32000,
+    "message": "Unauthorized",
+    "data": "Invalid API key"
+  }
+}</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Available Tools</h2>
+            <p>The MCP server exposes tools that external agents can call. Tools are dynamically available based on tenant configuration.</p>
+            
+            <h3>Tool Schema Example</h3>
+            <pre><code><span class="code">{
+  "name": "track_order",
+  "description": "Track order status and estimated delivery",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "order_id": {
+        "type": "string",
+        "description": "Order number to track"
+      }
+    },
+    "required": ["order_id"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "order_id": "string",
+      "status": "string",
+      "eta": "date",
+      "tracking_url": "string"
+    }
+  }
+}</code></pre>
+            
+            <h3>Tool Discovery</h3>
+            <pre><code><span class="code"># Get available tools (future MCP feature)
+curl -X POST http://localhost:8000/mcp/tools/list \
+  -H "Authorization: Bearer mcp_sk_abc123" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+
+# Response
+{
+  "tools": [
+    {
+      "name": "track_order",
+      "description": "Track order status and estimated delivery",
+      "input_schema": {...}
+    },
+    {
+      "name": "check_inventory",
+      "description": "Check product availability",
+      "input_schema": {...}
+    }
+  ]
+}</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Rate Limiting</h2>
+            <p>MCP requests are rate-limited per tenant to prevent abuse:</p>
+            
+            <h3>Rate Limits</h3>
+            <table>
+                <tr><th>Endpoint</th><th>Limit</th><th>Window</th></tr>
+                <tr><td><code>/mcp/query</code></td><td>100 requests</td><td>per minute</td></tr>
+                <tr><td><code>/mcp/query</code></td><td>1000 requests</td><td>per hour</td></tr>
+            </table>
+            
+            <h3>Rate Limit Headers</h3>
+            <pre><code><span class="code"># Rate limit response headers
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1640995200
+
+# 429 response
+HTTP/1.1 429 Too Many Requests
+Content-Type: application/json
+Retry-After: 60
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 0
+
+{
+  "error": "Too Many Requests",
+  "detail": "Rate limit exceeded. Please try again in 60 seconds.",
+  "retry_after": 60
+}</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Streaming Support (Experimental)</h2>
+            <p>Long responses can be streamed using Server-Sent Events (SSE). This is useful for long RAG contexts or complex tool chains.</p>
+            
+            <h3>Enable Streaming</h3>
+            <pre><code><span class="code"># Request streaming
+{
+  "tenant_id": "tenant123",
+  "user_context": {...},
+  "prompt": "Complex multi-step query...",
+  "stream": true
+}</code></pre>
+            
+            <h3>Streaming Response</h3>
+            <pre><code><span class="code"># Content-Type: text/event-stream
+event: response_chunk
+
+data: {"response": "Your order "}
+
+event: response_chunk
+
+data: {"response": "Your order ORD-12345 is "}
+
+event: response_chunk
+
+data: {"response": "ORD-12345 is currently in "}
+
+event: response_chunk
+
+data: {"response": "in transit. "}
+
+event: response_chunk
+
+data: {"response": "in transit. Expected delivery: "}
+
+event: response_chunk
+
+data: {"response": "in transit. Expected delivery: May 20, "}
+
+event: response_chunk
+
+data: {"response": "May 20, 2024. "}
+
+event: response_chunk
+
+data: {"response": "May 20, 2024. Tracking number: "}
+
+event: response_chunk
+
+data: {"response": "May 20, 2024. Tracking number: VN123456789"}
+
+event: complete
+
+data: {"complete": true, "tokens_used": 450}</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Implementation Example</h2>
+            <h3>FastAPI MCP Handler</h3>
+            <pre><code><span class="code"># MCP Server implementation
+from fastapi import FastAPI, Depends, HTTPException, Header
+from pydantic import BaseModel
+import os
+from typing import Optional, List
+
+app = FastAPI()
+
+# MCP API keys (load from env)
+MCP_API_KEYS = {
+    "mcp_key_1": "tenant_abc",
+    "mcp_key_2": "tenant_def"
+}
+
+# MCP Request models
+class MCPQueryRequest(BaseModel):
+    tenant_id: str
+    user_context: dict
+    prompt: str
+    tools: List[str] = []
+    stream: bool = False
+
+@app.post("/mcp/query")
+async def mcp_query(
+    request: MCPQueryRequest,
+    x_mcp_api_key: str = Header(None),
+    x_forwarded_for: str = Header(None)
+):
+    # Verify API key
+    if not x_mcp_api_key or x_mcp_api_key not in MCP_API_KEYS:
+        raise HTTPException(status_code=401, detail="Invalid MCP API key")
+    
+    # Verify tenant matches
+    expected_tenant = MCP_API_KEYS[x_mcp_api_key]
+    if request.tenant_id != expected_tenant:
+        raise HTTPException(status_code=403, detail="Tenant mismatch")
+    
+    # Check rate limits
+    if not rate_limiter.check(request.tenant_id):
+        raise HTTPException(status_code=429, detail="Rate limit exceeded")
+    
+    # Process query with LangChain
+    result = await process_mcp_query(request)
+    
+    return result
+
+async def process_mcp_query(request: MCPQueryRequest) -> dict:
+    """Process MCP query using LangChain agent."""
+    # Build prompt with context
+    full_prompt = f"""
+    User: {request.prompt}
+    
+    Available tools: {', '.join(request.tools)}
+    
+    Please answer using the appropriate tools if needed.
+    """
+    
+    # Call LangChain agent
+    from langchain.agents import initialize_agent, Tool
+    from langchain.llms import LiteLLM
+    
+    llm = LiteLLM(model="gpt-4o-mini", api_key=os.getenv("OPENAI_API_KEY"))
+    llm.agent = llm  # type: ignore
+    
+    # ... agent setup ...
+    
+    response = agent.run(full_prompt)
+    
+    return {
+        "response": response,
+        "tokens_used": 0,  # Calculate from LLM metrics
+        "tools_called": []
+    }</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Security Considerations</h2>
+            <h3>Authentication</h3>
+            <ul>
+                <li><strong>API Key Header:</strong> Include in every request</li>
+                <li><strong>Tenant Validation:</strong> Verify tenant matches API key</li>
+                <li><strong>IP Whitelist:</strong> Optionally restrict to known IPs</li>
+            </ul>
+            
+            <h3>Rate Limiting</h3>
+            <ul>
+                <li>Prevent DoS attacks</li>
+                <li>Control LLM API costs</li>
+                <li>Ensure fair usage</li>
+            </ul>
+            
+            <h3>Input Validation</h3>
+            <ul>
+                <li>Sanitize user prompts</li>
+                <li>Validate tool parameters</li>
+                <li>Block dangerous tool calls</li>
+            </ul>
+            
+            <h3>Audit Logging</h3>
+            <pre><code><span class="code"># Log all MCP requests
+import logging
+
+def log_mcp_request(request: MCPQueryRequest, response: dict):
+    """Log MCP request for audit trail."""
+    logging.info(f"MCP Query: {request.tenant_id} - {request.prompt[:100]}...", extra={
+        "tenant_id": request.tenant_id,
+        "prompt": request.prompt,
+        "tools_called": request.tools,
+        "response": response.get("response", "")[:200],
+        "tokens_used": response.get("tokens_used", 0),
+        "duration_ms": ...
+    })</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Testing MCP Integration</h2>
+            <h3>cURL Test</h3>
+            <pre><code><span class="code"># Test MCP endpoint
+curl -X POST http://localhost:8000/mcp/query \
+  -H "Authorization: Bearer mcp_sk_test" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tenant_id": "tenant_test",
+    "user_context": {
+      "user_id": "test_user",
+      "session_id": "test_session"
+    },
+    "prompt": "What are our top 5 selling products?",
+    "tools": ["search_products", "get_analytics"]
+  }'
+
+# Response
+{
+  "response": "Our top 5 selling products this month are: iPhone 15, Samsung Galaxy S24, MacBook Pro M3, AirPods Pro 2, and Sony WH-1000XM5.",
+  "tokens_used": 520,
+  "tools_called": ["search_products", "get_analytics"]
+}</code></pre>
+            
+            <h3>Python Test</h3>
+            <pre><code><span class="code"># Python test script
+import requests
+
+def test_mcp_query():
+    url = "http://localhost:8000/mcp/query"
+    headers = {
+        "Authorization": "Bearer mcp_sk_test",
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "tenant_id": "tenant_test",
+        "user_context": {
+            "user_id": "test_user",
+            "session_id": "test_session"
+        },
+        "prompt": "Help me track order ORD-999"
+    }
+    
+    response = requests.post(url, json=payload, headers=headers)
+    
+    if response.status_code == 200:
+        result = response.json()
+        print(f"Response: {result['response']}")
+        print(f"Tokens used: {result['tokens_used']}")
+    else:
+        print(f"Error: {response.status_code} - {response.text}")
+
+test_mcp_query()</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>MCP Clients</h2>
+            <p>MCP is becoming a standard protocol. Here are compatible clients you can use:</p>
+            
+            <h3>Compatible MCP Clients</h3>
+            <ul>
+                <li><strong>Claude AI:</strong> Supports MCP natively (claude.ai/mcp)</li>
+                <li><strong>Cursor:</strong> MCP-enabled IDE with built-in support</li>
+                <li><strong>Windsurf:</strong> AI IDE with MCP integration</li>
+                <li><strong>Coderabbit:</strong> Supports MCP for agent connections</li>
+            </ul>
+            
+            <h3>Configuration</h3>
+            <pre><code><span class="code"># Claude MCP configuration (.claude/mcp.json)
+{
+  "mcpServers": {
+    "sc-chatbot": {
+      "command": "curl",
+      "args": [
+        "http://localhost:8000/mcp/query",
+        "-H", "Authorization: Bearer mcp_sk_abc123",
+        "-d", '{"tenant_id": "tenant123", "prompt": "..."}'
+      ]
+    }
+  }
+}</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Next Steps</h2>
+            <ul>
+                <li><a href="../guides/function-calling.html">Learn about function calling</a></li>
+                <li><a href="../deployment/docker.html">Deploy with Docker</a></li>
+                <li><a href="../plan.html">View project plan</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

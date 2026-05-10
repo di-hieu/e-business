@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Function Calling - SC Chatbot</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; margin-bottom: 20px; }
+        header h1 { font-size: 2rem; }
+        a { color: #667eea; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .card { background: white; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { color: #667eea; margin-bottom: 15px; }
+        h3 { color: #764ba2; margin: 25px 0 10px 0; }
+        pre { background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; }
+        code { font-family: 'Courier New', monospace; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-top: 10px; }
+        .badge-poc { background: #e3f2fd; color: #1976d2; }
+        .badge-mvp { background: #f3e5f5; color: #7b1fa2; }
+        .badge-planned { background: #fff3e0; color: #f57c00; }
+        .badge-done { background: #c8e6c9; color: #2e7d32; }
+        .back-link { display: inline-block; background: #667eea; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; margin-bottom: 20px; }
+        ul, ol { margin-left: 20px; margin-top: 10px; }
+        li { margin-bottom: 8px; }
+        .tip { background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #9c27b0; }
+        .warning { background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #f57c00; }
+        .workflow-step { display: flex; gap: 20px; margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; }
+        .workflow-step .step-num { background: #667eea; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; flex-shrink: 0; }
+        .workflow-step .step-content { flex: 1; }
+        .workflow-step h5 { color: #764ba2; margin-bottom: 8px; }
+        .table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        .table th, .table td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        .table th { background: #667eea; color: white; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🛠️ Function Calling Guide</h1>
+    </header>
+    <div class="container">
+        <a href="../table-of-contents.html" class="back-link">← Back to Documentation</a>
+        
+        <div class="card">
+            <h2>Overview</h2>
+            <p>Function Calling enables the chatbot to perform actions beyond simple conversation. Admins define custom tools (API endpoints), and the LLM decides when to call them based on user queries. This capability transforms the chatbot from a passive responder to an active assistant.</p>
+            <span class="badge badge-planned">Planned</span>
+        </div>
+
+        <div class="card">
+            <h2>What is Function Calling?</h2>
+            <p>Function Calling (also known as Tool Calling) is an LLM capability where the model can:</p>
+            <ol>
+                <li><strong>Identify</strong> when a user query requires an external action</li>
+                <li><strong>Select</strong> the appropriate tool to call</li>
+                <li><strong>Construct</strong> the correct parameters for the tool</li>
+                <li><strong>Execute</strong> the tool call via API</li>
+                <li><strong>Present</strong> the result to the user in natural language</li>
+            </ol>
+            
+            <h3>Example Flow</h3>
+            <div class="workflow-step">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <h5>User Query</h5>
+                    <p>"What's the price of product SKU123?"</p>
+                </div>
+            </div>
+            
+            <div class="workflow-step">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <h5>LLM Analysis</h5>
+                    <p>LLM recognizes this requires checking inventory/pricing → calls check_inventory(SKU="SKU123")</p>
+                </div>
+            </div>
+            
+            <div class="workflow-step">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <h5>Tool Execution</h5>
+                    <p>API returns: {"product": "Widget Pro", "price": "$49.99", "stock": 50}</p>
+                </div>
+            </div>
+            
+            <div class="workflow-step">
+                <div class="step-num">4</div>
+                <div class="step-content">
+                    <h5>Final Response</h5>
+                    <p>LLM formats: "The Widget Pro costs $49.99 and we have 50 units in stock."</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Tool Definition Framework</h2>
+            <p>Admins define tools via the admin dashboard or API. Each tool needs:</p>
+            <ul>
+                <li><strong>name:</strong> Unique identifier (e.g., check_inventory, track_order)</li>
+                <li><strong>description:</strong> What the tool does (guides LLM when to use it)</li>
+                <li><strong>parameters:</strong> JSON Schema defining input structure</li>
+                <li><strong>endpoint:</strong> API URL where tool is exposed</li>
+                <li><strong>auth:</strong> Authentication method (API key, OAuth, etc.)</li>
+            </ul>
+            
+            <h3>Example Tool Definitions</h3>
+            <pre><code><span class="code"># Tool 1: Check Inventory
+{
+  "tool_id": "check_inventory",
+  "name": "check_inventory",
+  "description": "Check product availability and pricing by region",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "sku": {
+        "type": "string",
+        "description": "Product SKU to check"
+      },
+      "region": {
+        "type": "string",
+        "enum": ["VN", "US", "EU", "APAC"],
+        "description": "Target market region"
+      }
+    },
+    "required": ["sku", "region"]
+  },
+  "endpoint": "https://api.example.com/inventory/check",
+  "method": "GET",
+  "auth": "api_key"
+}
+
+# Tool 2: Track Order
+{
+  "tool_id": "track_order",
+  "name": "track_order",
+  "description": "Track order status and estimated delivery",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "order_id": {
+        "type": "string",
+        "description": "Order number to track"
+      }
+    },
+    "required": ["order_id"]
+  },
+  "endpoint": "https://api.example.com/orders/{order_id}",
+  "method": "GET",
+  "auth": "bearer"
+}
+
+# Tool 3: Book Tour
+{
+  "tool_id": "book_tour",
+  "name": "book_tour",
+  "description": "Check availability and book a tour",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "tour_id": {
+        "type": "string",
+        "description": "Tour identifier"
+      },
+      "date": {
+        "type": "string",
+        "format": "date",
+        "description": "Tour date (YYYY-MM-DD)"
+      },
+      "participants": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 50,
+        "description": "Number of participants"
+      }
+    },
+    "required": ["tour_id", "date", "participants"]
+  },
+  "endpoint": "https://api.example.com/tours/book",
+  "method": "POST",
+  "auth": "bearer"
+}</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Defining Tools via API</h2>
+            <h3>Register a Tool</h3>
+            <pre><code><span class="code"># Register new tool
+curl -X POST http://localhost:8000/api/tenants/tenant123/tools \
+  -H "Authorization: Bearer TENANT_ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tool_id": "check_stock",
+    "name": "check_stock",
+    "description": "Check stock levels for specific product",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "product_id": {
+          "type": "string",
+          "description": "Product identifier"
+        },
+        "warehouse": {
+          "type": "string",
+          "description": "Warehouse location"
+        }
+      },
+      "required": ["product_id", "warehouse"]
+    },
+    "endpoint": "https://oms.example.com/api/v1/inventory/stock",
+    "method": "GET",
+    "auth_header": "X-API-Key",
+    "auth_value": "{{OMS_API_KEY}}"
+  }'
+
+# Response
+{
+    "tool_id": "check_stock",
+    "status": "active",
+    "created_at": "2024-01-15T10:30:00Z"
+}</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Parameter Extraction</h2>
+            <p>The LLM needs to extract the right parameters from user queries. This requires clear descriptions in the tool schema.</p>
+            
+            <h3>Parameter Examples</h3>
+            <pre><code><span class="code"># Good parameter descriptions
+{
+  "parameters": {
+    "properties": {
+      "order_id": {
+        "type": "string",
+        "description": "Customer order number (e.g., ORD-12345)"
+      }
+    }
+  }
+}
+
+# Bad parameter descriptions
+{
+  "parameters": {
+    "properties": {
+      "id": {
+        "type": "string"
+      }
+    }
+  }
+}
+
+# The first version helps the LLM understand the expected format.</code></pre>
+            
+            <h3>Handling Missing Parameters</h3>
+            <p>When a user query lacks required parameters, the LLM should ask clarifying questions:</p>
+            
+            <div class="workflow-step">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <h5>User Query</h5>
+                    <p>"Check my order"</p>
+                </div>
+            </div>
+            
+            <div class="workflow-step">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <h5>LLM Response</h5>
+                    <p>"Could you please provide your order number? For example: ORD-12345"</p>
+                </div>
+            </div>
+            
+            <div class="workflow-step">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <h5>User Response</h5>
+                    <p>"ORD-67890"</p>
+                </div>
+            </div>
+            
+            <div class="workflow-step">
+                <div class="step-num">4</div>
+                <div class="step-content">
+                    <h5>Tool Execution</h5>
+                    <p>LLM now calls track_order(order_id="ORD-67890")</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Tool Execution Flow</h2>
+            <p>Here's how the system executes a tool call:</p>
+            
+            <div class="workflow-step">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <h5>User Message Received</h5>
+                    <p>User asks: "How much does the iPhone 15 cost in Vietnam?"</p>
+                </div>
+            </div>
+            
+            <div class="workflow-step">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <h5>Tool Selection</h5>
+                    <p>LLM identifies check_product_price is relevant → selects it from available tools</p>
+                </div>
+            </div>
+            
+            <div class="workflow-step">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <h5>Parameter Extraction</h5>
+                    <p>LLM extracts: {"product": "iPhone 15", "country": "Vietnam"} from query</p>
+                </div>
+            </div>
+            
+            <div class="workflow-step">
+                <div class="step-num">4</div>
+                <div class="step-content">
+                    <h5>API Call</h5>
+                    <p>System calls: GET https://api.example.com/products/price?product=iphone15&country=vn</p>
+                </div>
+            </div>
+            
+            <div class="workflow-step">
+                <div class="step-num">5</div>
+                <div class="step-content">
+                    <h5>Response Processing</h5>
+                    <p>API returns: {"price": "$49.99", "currency": "USD", "tax_included": true}</p>
+                </div>
+            </div>
+            
+            <div class="workflow-step">
+                <div class="step-num">6</div>
+                <div class="step-content">
+                    <h5>Final Response</h5>
+                    <p>LLM formats: "The iPhone 15 in Vietnam costs $49.99 USD (tax included)"</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Tool Calling with LangChain</h2>
+            <p>Here's how to implement tools using LangChain:</p>
+            
+            <h3>Create a Tool Class</h3>
+            <pre><code><span class="code"># LangChain Tool wrapper
+from langchain.tools import tool
+
+@tool
+def check_inventory(sku: str, region: str) -> dict:
+    """Check product availability and pricing.
+    
+    Args:
+        sku: Product SKU identifier
+        region: Target region (VN, US, EU, APAC)
+    
+    Returns:
+        Product information including price and stock
+    """
+    # Call external API
+    response = requests.get(
+        f"https://api.example.com/inventory/{sku}",
+        headers={"X-API-Key": os.getenv("OMS_API_KEY")},
+        params={"region": region}
+    )
+    
+    return {
+        "product": response.json()["product_name"],
+        "price": response.json()["price"],
+        "stock": response.json()["available_quantity"],
+        "region": region
+    }
+
+# Register with LangGraph
+tools = [check_inventory]
+
+# Use in LangChain agent
+from langgraph.graph import StateGraph
+from langchain_core.messages import BaseMessage
+
+graph = StateGraph(state_schema)
+graph.add_node("tools", execute_tool(tools))
+graph.add_edge("start", "tools")
+
+app = graph.compile()</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Tool Calling Best Practices</h2>
+            <h3>Description Quality</h3>
+            <ul>
+                <li>Use specific, descriptive names (not generic like "get_info")</li>
+                <li>Include examples in parameter descriptions</li>
+                <li>Be explicit about what the tool returns</li>
+            </ul>
+            
+            <h3>Error Handling</h3>
+            <pre><code><span class="code"># Handle API errors gracefully
+@tool
+def check_inventory(sku: str, region: str) -> dict:
+    try:
+        response = requests.get(url, ...)
+        return {"product": ..., "error": None}
+    except requests.exceptions.HTTPError as e:
+        return {"product": "Unknown", "error": f"API error: {e}"}
+    except Exception as e:
+        return {"product": "Unknown", "error": str(e)}</code></pre>
+            
+            <h3>Rate Limiting</h3>
+            <p>Implement rate limiting on external API calls to avoid hitting quotas:</p>
+            <pre><code><span class="code"># Add retry logic with exponential backoff
+import time
+from tenacity import retry, stop_after_attempt, wait_exponential
+
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+def call_api_with_retry(url: str, **kwargs) -> dict:
+    response = requests.get(url, **kwargs)
+    response.raise_for_status()
+    return response.json()</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Example Tools List</h2>
+            <table>
+                <tr><th>Tool Name</th><th>Description</th><th>Use Case</th></tr>
+                <tr><td><strong>check_inventory</strong></td><td>Check stock by region</td><td>Order confirmation flow</td></tr>
+                <tr><td><strong>track_order</strong></td><td>Track order status</td><td>Customer support queries</td></tr>
+                <tr><td><strong>book_tour</strong></td><td>Book and manage tours</td><td>Tour booking system</td></tr>
+                <tr><td><strong>create_order</strong></td><td>Create customer orders</td><td>Order management system</td></tr>
+                <tr><td><strong>get_customer_info</strong></td><td>Retrieve customer details</td><td>Personalized responses</td></tr>
+                <tr><td><strong>search_products</strong></td><td>Natural language search</td><td>Product discovery</td></tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Next Steps</h2>
+            <ul>
+                <li><a href="channel-integration.html">Set up channel integrations</a></li>
+                <li><a href="deployment/docker.html">Deploy with Docker</a></li>
+                <li><a href="../plan.html">View project plan</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SC Chatbot - Comprehensive Project Plan</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; margin-bottom: 30px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        header h1 { font-size: 2.8rem; margin-bottom: 10px; }
+        header p { font-size: 1.2rem; opacity: 0.95; }
+        .back-link { display: inline-block; background: white; color: #667eea; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-bottom: 30px; transition: transform 0.2s; }
+        .back-link:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .summary { background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .summary h2 { color: #667eea; margin-bottom: 15px; font-size: 1.8rem; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }
+        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; }
+        .stat-card h3 { font-size: 2.5rem; margin-bottom: 5px; }
+        .stat-card p { font-size: 0.9rem; opacity: 0.9; }
+        .timeline { margin-bottom: 40px; }
+        .phase { background: white; border-radius: 12px; padding: 30px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-left: 6px solid #667eea; }
+        .phase h2 { color: #667eea; margin-bottom: 20px; font-size: 1.6rem; display: flex; align-items: center; gap: 10px; }
+        .phase-meta { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+        .meta-item { background: #f8f9fa; padding: 8px 15px; border-radius: 6px; font-size: 0.9rem; }
+        .epic { margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #764ba2; }
+        .epic h3 { color: #764ba2; margin-bottom: 15px; font-size: 1.2rem; }
+        .epic ul { margin-left: 20px; }
+        .epic li { margin-bottom: 10px; position: relative; padding-left: 10px; }
+        .task-checkbox { margin-right: 8px; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-left: 10px; }
+        .badge-poc { background: #e3f2fd; color: #1976d2; }
+        .badge-mvp { background: #f3e5f5; color: #7b1fa2; }
+        .badge-prod { background: #e8f5e9; color: #388e3c; }
+        .badge-planned { background: #fff3e0; color: #f57c00; }
+        .badge-done { background: #c8e6c9; color: #2e7d32; }
+        .badge-progress { background: #fff9c4; color: #f57f17; }
+        .dependencies { background: #fff3e0; padding: 15px; border-radius: 8px; margin-top: 15px; }
+        .dependencies h4 { color: #f57c00; margin-bottom: 10px; font-size: 1rem; }
+        .tech-stack { background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .tech-stack h2 { color: #667eea; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+        th { background: #667eea; color: white; font-weight: 600; }
+        tr:hover { background: #f8f9fa; }
+        .milestone { background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%); color: white; padding: 20px; border-radius: 10px; margin: 20px 0; }
+        .milestone h3 { font-size: 1.3rem; margin-bottom: 10px; }
+        .risk-section { background: #ffebee; padding: 20px; border-radius: 8px; margin-top: 20px; border-left: 4px solid #d32f2f; }
+        .risk-section h4 { color: #d32f2f; margin-bottom: 10px; }
+        footer { text-align: center; padding: 30px 20px; color: #666; font-size: 0.9rem; background: white; border-radius: 12px; margin-top: 30px; }
+        .progress-bar { background: #e0e0e0; height: 25px; border-radius: 15px; overflow: hidden; margin: 15px 0; }
+        .progress-fill { background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.85rem; transition: width 0.3s; }
+        .section-header { background: white; border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-left: 5px solid #764ba2; }
+        .section-header h2 { color: #764ba2; margin-bottom: 15px; font-size: 1.5rem; }
+        .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
+        .tech-card { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 20px; border-radius: 10px; }
+        .tech-card h4 { color: #333; margin-bottom: 10px; }
+        .tech-card p { font-size: 0.9rem; color: #555; }
+        .tech-card .tech-name { font-weight: 600; color: #667eea; }
+        .progress-item { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; }
+        .progress-item h4 { color: #333; font-size: 1rem; }
+        .progress-item .progress { display: flex; align-items: center; gap: 15px; }
+        .progress-bar-mini { flex: 1; height: 20px; background: #e0e0e0; border-radius: 10px; overflow: hidden; }
+        .progress-fill-mini { height: 100%; transition: width 0.3s; }
+        .progress-fill-poc { background: linear-gradient(90deg, #2196f3 0%, #2196f3 100%); }
+        .progress-fill-mvp { background: linear-gradient(90deg, #9c27b0 0%, #9c27b0 100%); }
+        .progress-fill-prod { background: linear-gradient(90deg, #4caf50 0%, #4caf50 100%); }
+        .progress-text { min-width: 80px; font-weight: 600; font-size: 0.9rem; }
+        .comparison-table { background: white; border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .comparison-table h2 { color: #667eea; margin-bottom: 20px; font-size: 1.5rem; }
+        .work-breakdown { background: white; border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .work-breakdown h2 { color: #667eea; margin-bottom: 20px; font-size: 1.5rem; }
+        .wbs-level-1 { margin-left: 0; padding-left: 0; }
+        .wbs-level-2 { margin-left: 25px; padding-left: 10px; border-left: 2px solid #e0e0e0; }
+        .wbs-level-3 { margin-left: 25px; padding-left: 10px; border-left: 2px solid #e0e0e0; font-size: 0.9rem; }
+        .wbs-item { margin: 8px 0; }
+        .wbs-item h4 { color: #667eea; margin-bottom: 5px; }
+        .wbs-item ul { list-style: none; padding-left: 0; }
+        .wbs-item li { padding: 3px 0; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🚀 SC Chatbot Project Plan</h1>
+        <p>Social Commerce AI Chatbot for SMEs - Comprehensive Roadmap</p>
+    </header>
+    <div class="container">
+        <a href="table-of-contents.html" class="back-link">← Back to Documentation</a>
+        
+        <div class="summary">
+            <h2>📊 Project Overview</h2>
+            <p><strong>Mission:</strong> Build a production-ready, multi-tenant AI chatbot platform that enables SMEs to automate customer support and integrate with social commerce channels (Zalo, Facebook, Instagram).</p>
+            <p style="margin-top: 10px;"><strong>Target Market:</strong> Small and Medium Enterprises in Vietnam and Southeast Asia needing affordable, AI-powered customer service automation.</p>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>3</h3>
+                    <p>Development Phases</p>
+                </div>
+                <div class="stat-card">
+                    <h3>8</h3>
+                    <p>Core Epics</p>
+                </div>
+                <div class="stat-card">
+                    <h3>21</h3>
+                    <p>Months Timeline</p>
+                </div>
+                <div class="stat-card">
+                    <h3>60+</h3>
+                    <p>Feature Tasks</p>
+                </div>
+            </div>
+            
+            <div class="progress-bar" style="margin-top: 25px;">
+                <div class="progress-fill" style="width: 5%;">POC: 5% Complete</div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h2>📈 Project Progress Tracking</h2>
+            <p>Current completion status across all phases</p>
+        </div>
+        
+        <div class="progress-item">
+            <h4>Phase 1: POC (Months 1-3)</h4>
+            <div class="progress">
+                <div class="progress-bar-mini"><div class="progress-fill-mini progress-fill-poc" style="width: 5%;">5%</div></div>
+                <span class="progress-text" style="min-width: auto;">5%</span>
+            </div>
+        </div>
+        
+        <div class="progress-item">
+            <h4>Phase 2: MVP (Months 4-9)</h4>
+            <div class="progress">
+                <div class="progress-bar-mini"><div class="progress-fill-mini progress-fill-mvp" style="width: 0%;">0%</div></div>
+                <span class="progress-text" style="min-width: auto;">Not Started</span>
+            </div>
+        </div>
+        
+        <div class="progress-item">
+            <h4>Phase 3: Production (Months 10-21)</h4>
+            <div class="progress">
+                <div class="progress-bar-mini"><div class="progress-fill-mini progress-fill-prod" style="width: 0%;">0%</div></div>
+                <span class="progress-text" style="min-width: auto;">Not Started</span>
+            </div>
+        </div>
+
+        <div class="comparison-table">
+            <h2>🔬 Technology Comparison: POC vs Production</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Layer</th>
+                        <th>POC Technology</th>
+                        <th>Production Upgrade Path</th>
+                        <th>Rationale</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Backend Framework</strong></td>
+                        <td>FastAPI (Python 3.11+)</td>
+                        <td>Same (add gunicorn/uvicorn workers)</td>
+                        <td>Async-first, fast prototyping, type hints, auto docs</td>
+                    </tr>
+                    <tr>
+                        <td><strong>LLM Orchestration</strong></td>
+                        <td>LangChain + LangGraph</td>
+                        <td>Same (optimize prompts, add streaming)</td>
+                        <td>Industry standard for RAG + function calling, composable agents</td>
+                    </tr>
+                    <tr>
+                        <td><strong>LLM Gateway</strong></td>
+                        <td>LiteLLM</td>
+                        <td>Same (add caching, fallbacks)</td>
+                        <td>Unified interface for OpenAI, Anthropic, OpenRouter, local models</td>
+                    </tr>
+                    <tr>
+                        <td><strong>LLM Provider</strong></td>
+                        <td>GPT-4o-mini / OpenRouter</td>
+                        <td>Add Ollama local models, Claude</td>
+                        <td>Fast, reliable, no GPU setup for POC</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Embeddings</strong></td>
+                        <td>all-MiniLM-L6-v2 (local)</td>
+                        <td>OpenAI text-embedding-3-small or BGE</td>
+                        <td>Free, in-process, good quality for POC</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Vector Database</strong></td>
+                        <td>FAISS (file-based)</td>
+                        <td>Qdrant or Weaviate (managed service)</td>
+                        <td>No separate service, good for <100k vectors per tenant</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Conversation DB</strong></td>
+                        <td>SQLite + aiosqlite</td>
+                        <td>PostgreSQL (AWS RDS or managed)</td>
+                        <td>Single file, no server, perfect for POC and on-prem</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Caching</strong></td>
+                        <td>functools.lru_cache + TTL dict</td>
+                        <td>Redis (for distributed cache)</td>
+                        <td>In-memory, zero setup, sufficient for POC</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Rate Limiting</strong></td>
+                        <td>aiolimiter (in-process)</td>
+                        <td>Redis-backed rate limiter</td>
+                        <td>Simple token bucket algorithm, works per-instance</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Async Tasks</strong></td>
+                        <td>FastAPI BackgroundTasks</td>
+                        <td>Celery + Redis/RabbitMQ</td>
+                        <td>Good for webhook processing and crawls in POC</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Frontend Framework</strong></td>
+                        <td>React 18 + Vite</td>
+                        <td>Same</td>
+                        <td>Fast dev server, modern React features, HMR</td>
+                    </tr>
+                    <tr>
+                        <td><strong>UI Library</strong></td>
+                        <td>Bootstrap 5</td>
+                        <td>Migrate to Tailwind + shadcn/ui or Ant Design</td>
+                        <td>Faster POC development, familiar components</td>
+                    </tr>
+                    <tr>
+                        <td><strong>State Management</strong></td>
+                        <td>React Context + hooks</td>
+                        <td>Zustand or Redux Toolkit</td>
+                        <td>Built-in, sufficient for POC dashboard</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Deployment</strong></td>
+                        <td>Docker + Docker Compose</td>
+                        <td>Add Kubernetes (AWS EKS) or systemd services</td>
+                        <td>One command startup, portable</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Monitoring</strong></td>
+                        <td>Structured logs + /health endpoint</td>
+                        <td>Prometheus + Grafana + OpenTelemetry</td>
+                        <td>POC focuses on functionality, not observability</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Testing</strong></td>
+                        <td>pytest + pytest-asyncio</td>
+                        <td>Same (add integration tests, E2E)</td>
+                        <td>Python standard, async support</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Packaging</strong></td>
+                        <td>None (Docker only)</td>
+                        <td>fpm for .deb/.rpm packages</td>
+                        <td>POC uses Docker, on-prem customers need .deb/.rpm</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section-header">
+            <h2>🔬 Technology Stack Deep Dive</h2>
+            <p>Detailed explanations of why each technology was chosen</p>
+        </div>
+
+        <div class="tech-grid">
+            <div class="tech-card">
+                <h4>🐍 <span class="tech-name">FastAPI</span></h4>
+                <p>Modern, fast (high-performance) web framework for building APIs with Python 3.10+ based on standard Python type hints. Automatic interactive documentation, async support, and dependency injection.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4>🧩 <span class="tech-name">LangChain</span></h4>
+                <p>Framework for developing applications powered by language models. Provides chains, agents, memory components. Industry standard for building LLM applications.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4>🔁 <span class="tech-name">LangGraph</span></h4>
+                <p>Extend LangChain with graphs. Cyclic behavior, stateful apps. Enable complex multi-turn conversations with proper memory management and handoff logic.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4>🚪 <span class="tech-name">LiteLLM</span></h4>
+                <p>Unified interface to call all LLMs. Standardize on one interface (like OpenAI) while supporting OpenAI, Anthropic, Cohere, Ollama, and hundreds more models.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4>🔍 <span class="tech-name">FAISS</span></h4>
+                <p>Facebook AI Similarity Search - efficient library for similarity search and clustering of dense vectors. File-based, zero setup, ideal for POC phase.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4>🗄️ <span class="tech-name">Qdrant</span></h4>
+                <p>Cloud-native vector database. Multi-tenant support, metadata filtering, clustering, managed service options. Production-ready for scaling.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4>💾 <span class="tech-name">SQLite</span></h4>
+                <p>Embedded database, zero configuration. Single file, no server process. Perfect for development, testing, and on-prem deployments.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4>🦈 <span class="tech-name">PostgreSQL</span></h4>
+                <p>Advanced relational database with JSONB, full-text search, row-level security. Production-grade for multi-tenant scenarios with proper tenant isolation.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4>⚡ <span class="tech-name">Redis</span></h4>
+                <p>In-memory data structure store. Caching, session storage, message queues. Sub-millisecond access, persistence options, pub/sub.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4>🔧 <span class="tech-name">Celery</span></h4>
+                <p>Distributed task queue. Handle long-running crawls, persistent tasks across restarts, worker scaling. Production workhorse for async jobs.</p>
+            </div>
+        </div>
+
+        <div class="tech-stack">
+            <h2>🛠️ Technology Stack & Architecture Decisions</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Layer</th>
+                        <th>POC Technology</th>
+                        <th>Production Upgrade Path</th>
+                        <th>Rationale</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Backend Framework</strong></td>
+                        <td>FastAPI (Python 3.11+)</td>
+                        <td>Same (add gunicorn/uvicorn workers)</td>
+                        <td>Async-first, fast prototyping, type hints, auto docs</td>
+                    </tr>
+                    <tr>
+                        <td><strong>LLM Orchestration</strong></td>
+                        <td>LangChain + LangGraph</td>
+                        <td>Same (optimize prompts, add streaming)</td>
+                        <td>Industry standard for RAG + function calling, composable agents</td>
+                    </tr>
+                    <tr>
+                        <td><strong>LLM Gateway</strong></td>
+                        <td>LiteLLM</td>
+                        <td>Same (add caching, fallbacks)</td>
+                        <td>Unified interface for OpenAI, Anthropic, OpenRouter, local models</td>
+                    </tr>
+                    <tr>
+                        <td><strong>LLM Provider</strong></td>
+                        <td>GPT-4o-mini / OpenRouter</td>
+                        <td>Add Ollama local models, Claude</td>
+                        <td>Fast, reliable, no GPU setup for POC</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Embeddings</strong></td>
+                        <td>all-MiniLM-L6-v2 (local)</td>
+                        <td>OpenAI text-embedding-3-small or BGE</td>
+                        <td>Free, in-process, good quality for POC</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Vector Database</strong></td>
+                        <td>FAISS (file-based)</td>
+                        <td>Qdrant or Weaviate (managed service)</td>
+                        <td>No separate service, good for <100k vectors per tenant</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Conversation DB</strong></td>
+                        <td>SQLite + aiosqlite</td>
+                        <td>PostgreSQL (AWS RDS or managed)</td>
+                        <td>Single file, no server, perfect for POC and on-prem</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Caching</strong></td>
+                        <td>functools.lru_cache + TTL dict</td>
+                        <td>Redis (for distributed cache)</td>
+                        <td>In-memory, zero setup, sufficient for POC</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Rate Limiting</strong></td>
+                        <td>aiolimiter (in-process)</td>
+                        <td>Redis-backed rate limiter</td>
+                        <td>Simple token bucket algorithm, works per-instance</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Async Tasks</strong></td>
+                        <td>FastAPI BackgroundTasks</td>
+                        <td>Celery + Redis/RabbitMQ</td>
+                        <td>Good for webhook processing and crawls in POC</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Frontend Framework</strong></td>
+                        <td>React 18 + Vite</td>
+                        <td>Same</td>
+                        <td>Fast dev server, modern React features, HMR</td>
+                    </tr>
+                    <tr>
+                        <td><strong>UI Library</strong></td>
+                        <td>Bootstrap 5</td>
+                        <td>Migrate to Tailwind + shadcn/ui or Ant Design</td>
+                        <td>Faster POC development, familiar components</td>
+                    </tr>
+                    <tr>
+                        <td><strong>State Management</strong></td>
+                        <td>React Context + hooks</td>
+                        <td>Zustand or Redux Toolkit</td>
+                        <td>Built-in, sufficient for POC dashboard</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Deployment</strong></td>
+                        <td>Docker + Docker Compose</td>
+                        <td>Add Kubernetes (AWS EKS) or systemd services</td>
+                        <td>One command startup, portable</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Monitoring</strong></td>
+                        <td>Structured logs + /health endpoint</td>
+                        <td>Prometheus + Grafana + OpenTelemetry</td>
+                        <td>POC focuses on functionality, not observability</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Testing</strong></td>
+                        <td>pytest + pytest-asyncio</td>
+                        <td>Same (add integration tests, E2E)</td>
+                        <td>Python standard, async support</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Packaging</strong></td>
+                        <td>None (Docker only)</td>
+                        <td>fpm for .deb/.rpm packages</td>
+                        <td>POC uses Docker, on-prem customers need .deb/.rpm</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="timeline">
+            <div class="phase">
+                <h2>🎯 Phase 1: Proof-of-Concept (POC) <span class="badge badge-progress">IN PROGRESS</span></h2>
+                <div class="phase-meta">
+                    <div class="meta-item"><strong>Duration:</strong> 3 months</div>
+                    <div class="meta-item"><strong>Timeline:</strong> Month 1-3</div>
+                    <div class="meta-item"><strong>Goal:</strong> Validate core AI capabilities</div>
+                    <div class="meta-item"><strong>Team:</strong> 2-3 developers</div>
+                </div>
+                
+                <div class="milestone">
+                    <h3>🎉 Success Criteria</h3>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>✅ Chatbot responds intelligently using RAG from uploaded FAQs</li>
+                        <li>✅ Can call at least 2 custom tools (e.g., check_inventory, track_order)</li>
+                        <li>✅ Zalo Official Account integration working end-to-end</li>
+                        <li>✅ Docker Compose brings up full stack in < 2 minutes</li>
+                        <li>✅ Admin can upload knowledge via basic UI</li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 1.1: Core AI Engine & RAG <span class="badge badge-poc">POC</span></h3>
+                    <ul>
+                        <li><input type="checkbox" class="task-checkbox"> Setup LangChain + LangGraph project structure</li>
+                        <li><input type="checkbox" class="task-checkbox"> Integrate LiteLLM gateway (OpenAI/OpenRouter support)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement embedding pipeline (all-MiniLM-L6-v2)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Setup FAISS vector store per tenant</li>
+                        <li><input type="checkbox" class="task-checkbox"> Build RAG retrieval chain (semantic search + context injection)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement conversation memory (last 10 exchanges)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Create LangGraph agent for multi-turn dialog</li>
+                    </ul>
+                    <div class="dependencies">
+                        <h4>🔗 Dependencies:</h4>
+                        <p>None (foundational epic)</p>
+                    </div>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 1.2: FastAPI Backend Foundation <span class="badge badge-poc">POC</span></h3>
+                    <ul>
+                        <li><input type="checkbox" class="task-checkbox"> Setup FastAPI project with async SQLite (aiosqlite)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Create tenant, user, conversation models (SQLAlchemy)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement JWT authentication & RBAC middleware</li>
+                        <li><input type="checkbox" class="task-checkbox"> Build /chat/messages endpoint (WebSocket + REST)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Create /knowledge/upload endpoint (text, PDF, CSV)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add rate limiting (aiolimiter, per tenant)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement /health and /metrics endpoints</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add structured logging (loguru or structlog)</li>
+                    </ul>
+                    <div class="dependencies">
+                        <h4>🔗 Dependencies:</h4>
+                        <p>Requires Epic 1.1 for AI engine integration</p>
+                    </div>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 1.3: Function Calling Framework <span class="badge badge-poc">POC</span></h3>
+                    <ul>
+                        <li><input type="checkbox" class="task-checkbox"> Design tool definition schema (JSON Schema based)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Create /tools/define endpoint (admin only)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement LangChain tool wrapper for custom endpoints</li>
+                        <li><input type="checkbox" class="task-checkbox"> Build parameter extraction loop (chatbot asks for missing params)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Create 3 example tools: check_inventory, track_order, book_tour</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add tool call logging and error handling</li>
+                    </ul>
+                    <div class="dependencies">
+                        <h4>🔗 Dependencies:</h4>
+                        <p>Requires Epic 1.1 (LangGraph agent), Epic 1.2 (backend endpoints)</p>
+                    </div>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 1.4: Zalo Official Account Integration <span class="badge badge-poc">POC</span></h3>
+                    <ul>
+                        <li><input type="checkbox" class="task-checkbox"> Register Zalo OA developer account & create test OA</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement webhook receiver (/webhooks/zalo)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add webhook signature verification (HMAC-SHA256)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Build message parser (text, image, audio)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement message sender (Zalo API client)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add template message support (for notifications)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Test end-to-end flow (user → Zalo → bot → response)</li>
+                    </ul>
+                    <div class="dependencies">
+                        <h4>🔗 Dependencies:</h4>
+                        <p>Requires Epic 1.2 (backend), Epic 1.1 (AI engine)</p>
+                    </div>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 1.5: Admin Dashboard (POC Version) <span class="badge badge-poc">POC</span></h3>
+                    <ul>
+                        <li><input type="checkbox" class="task-checkbox"> Setup React + Vite + Bootstrap 5 project</li>
+                        <li><input type="checkbox" class="task-checkbox"> Build login page (JWT authentication)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Create knowledge upload form (file upload + text paste)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Build tool definition UI (name, description, schema, endpoint)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add conversation viewer (simple list + details)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement basic analytics (queries/day, response time)</li>
+                    </ul>
+                    <div class="dependencies">
+                        <h4>🔗 Dependencies:</h4>
+                        <p>Requires Epic 1.2 (backend API)</p>
+                    </div>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 1.6: Docker & Deployment (POC) <span class="badge badge-poc">POC</span></h3>
+                    <ul>
+                        <li><input type="checkbox" class="task-checkbox"> Create Dockerfile for backend (multi-stage build)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Create Dockerfile for frontend (Nginx serve)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Write docker-compose.yml (backend, frontend, volumes)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add .env.example with all required variables</li>
+                        <li><input type="checkbox" class="task-checkbox"> Create Makefile (targets: dev, build, test, docker-up)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Write deployment guide (docs/deployment/docker.html)</li>
+                    </ul>
+                </div>
+
+                <div class="risk-section">
+                    <h4>⚠️ POC Risks & Mitigation</h4>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>LLM API costs:</strong> Use GPT-4o-mini (cheapest), implement prompt caching, set spending alerts</li>
+                        <li><strong>Zalo API limits:</strong> Zalo OA has rate limits; implement request queuing and backoff</li>
+                        <li><strong>Vector search quality:</strong> Use smaller chunk sizes (200-300 tokens), test various embeddings</li>
+                        <li><strong>Tool calling errors:</strong> Extensive error handling, retry logic, fallback to chat-only mode</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="phase">
+                <h2>🎯 Phase 2: Minimum Viable Product (MVP) <span class="badge badge-planned">PLANNED</span></h2>
+                <div class="phase-meta">
+                    <div class="meta-item"><strong>Duration:</strong> 6 months</div>
+                    <div class="meta-item"><strong>Timeline:</strong> Month 4-9</div>
+                    <div class="meta-item"><strong>Goal:</strong> Production-ready multi-tenant platform</div>
+                    <div class="meta-item"><strong>Team:</strong> 3-5 developers</div>
+                </div>
+
+                <div class="milestone">
+                    <h3>🎉 Success Criteria</h3>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>✅ Supports 10+ tenants with isolated data</li>
+                        <li>✅ Facebook Messenger integration working</li>
+                        <li>✅ Full admin dashboard (analytics, user management, tool config)</li>
+                        <li>✅ Production deployment on AWS (or on-prem .deb/.rpm)</li>
+                        <li>✅ Monitoring with Prometheus + Grafana</li>
+                        <li>✅ Automated testing (unit + integration coverage > 70%)</li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 2.1: Multi-Tenancy & Isolation <span class="badge badge-mvp">MVP</span></h3>
+                    <ul>
+                        <li><input type="checkbox" class="task-checkbox"> Implement tenant onboarding flow (signup, workspace creation)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add tenant API key generation & management</li>
+                        <li><input type="checkbox" class="task-checkbox"> Enforce tenant_id in all DB queries (middleware)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Separate FAISS indexes per tenant (file naming: tenant_{id}.faiss)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement tenant-level rate limiting</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add tenant settings (LLM model choice, response style, language)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Create Super Admin panel (view all tenants, usage, billing)</li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 2.2: Facebook Messenger Integration <span class="badge badge-mvp">MVP</span></h3>
+                    <ul>
+                        <li><input type="checkbox" class="task-checkbox"> Setup Facebook App & page for testing</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement webhook receiver (/webhooks/facebook)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add signature verification (Facebook X-Hub-Signature)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Build message parser (text, quick replies, attachments)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement Send API client (text, templates, quick replies)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add persistent menu configuration</li>
+                        <li><input type="checkbox" class="task-checkbox"> Test end-to-end flow with real Facebook page</li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 2.3: Advanced Knowledge Management <span class="badge badge-mvp">MVP</span></h3>
+                    <ul>
+                        <li><input type="checkbox" class="task-checkbox"> Build web crawler (Scrapy/BeautifulSoup) for client websites</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement chunking strategies (sentence, paragraph, semantic)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add document metadata tracking (source URL, last updated)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Create knowledge refresh scheduler (daily/weekly crawls)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Build manual FAQ editor in admin dashboard</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement vector store versioning (rollback support)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add knowledge search quality metrics (precision, recall)</li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 2.4: Enhanced Admin Dashboard <span class="badge badge-mvp">MVP</span></h3>
+                    <ul>
+                        <li><input type="checkbox" class="task-checkbox"> Migrate from Bootstrap to Tailwind + shadcn/ui (or Ant Design)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Build advanced analytics dashboard (charts, graphs, filters)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement conversation export (CSV, JSON)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add user management UI (roles: Tenant Admin, Agent)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Create tool testing interface (test tools from UI)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Build settings panel (LLM model, language, response style)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add real-time conversation monitoring (WebSocket updates)</li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 2.5: MCP Server Implementation <span class="badge badge-mvp">MVP</span></h3>
+                    <ul>
+                        <li><input type="checkbox" class="task-checkbox"> Implement MCP protocol server (Model Context Protocol)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Create /mcp/query endpoint with tenant auth</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add streaming support for long responses</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement MCP API key authentication</li>
+                        <li><input type="checkbox" class="task-checkbox"> Build usage tracking per MCP request</li>
+                        <li><input type="checkbox" class="task-checkbox"> Write MCP integration guide for external AI agents</li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 2.6: Production Infrastructure <span class="badge badge-mvp">MVP</span></h3>
+                    <ul>
+                        <li><input type="checkbox" class="task-checkbox"> Migrate SQLite → PostgreSQL (AWS RDS or self-hosted)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Setup Redis for caching & session storage</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement Celery for async tasks (crawls, webhooks)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add Prometheus metrics exporter</li>
+                        <li><input type="checkbox" class="task-checkbox"> Setup Grafana dashboards (response time, error rate, token usage)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement OpenTelemetry tracing</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add automated backups (DB + FAISS indexes)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Setup CI/CD pipeline (GitHub Actions or GitLab CI)</li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 2.7: Packaging & On-Prem Deployment <span class="badge badge-mvp">MVP</span></h3>
+                    <ul>
+                        <li><input type="checkbox" class="task-checkbox"> Create systemd unit files (backend, crawler, admin)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Build .deb package using fpm (for Ubuntu/Debian)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Build .rpm package using fpm (for CentOS/RHEL)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Create installation scripts (post-install, pre-remove)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Write on-prem deployment guide</li>
+                        <li><input type="checkbox" class="task-checkbox"> Test installation on Ubuntu 22.04 LTS</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add upgrade/migration scripts</li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 2.8: Testing & Quality Assurance <span class="badge badge-mvp">MVP</span></h3>
+                    <ul>
+                        <li><input type="checkbox" class="task-checkbox"> Write unit tests (pytest, coverage > 70%)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Create integration tests (API endpoints, DB operations)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Build E2E tests (Playwright for dashboard)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add LLM response quality tests (prompt templates, RAG accuracy)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement load testing (Locust, 1000 concurrent users)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Create security testing suite (OWASP Top 10)</li>
+                    </ul>
+                </div>
+
+                <div class="risk-section">
+                    <h4>⚠️ MVP Risks & Mitigation</h4>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>Database migration complexity:</strong> Use Alembic for migrations, test thoroughly in staging</li>
+                        <li><strong>Multi-tenant data leaks:</strong> Comprehensive RBAC tests, automated tenant isolation checks</li>
+                        <li><strong>On-prem deployment issues:</strong> Maintain Docker fallback, extensive OS compatibility testing</li>
+                        <li><strong>Performance at scale:</strong> Load testing early, implement caching aggressively</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="phase">
+                <h2>🎯 Phase 3: Production & Scale <span class="badge badge-planned">PLANNED</span></h2>
+                <div class="phase-meta">
+                    <div class="meta-item"><strong>Duration:</strong> 12 months</div>
+                    <div class="meta-item"><strong>Timeline:</strong> Month 10-21</div>
+                    <div class="meta-item"><strong>Goal:</strong> Enterprise-grade platform</div>
+                    <div class="meta-item"><strong>Team:</strong> 5-8 developers</div>
+                </div>
+
+                <div class="milestone">
+                    <h3>🎉 Success Criteria</h3>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>✅ Supports 100+ tenants with >10,000 daily active users</li>
+                        <li>✅ Instagram Direct integration working</li>
+                        <li>✅ Advanced billing & subscription management</li>
+                        <li>✅ Multi-region deployment (AWS multi-AZ)</li>
+                        <li>✅ SLA: 99.9% uptime, p95 response time < 500ms</li>
+                        <li>✅ Full audit logging & compliance (GDPR, SOC 2)</li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 3.1: Instagram Direct Integration <span class="badge badge-prod">PRODUCTION</span></h3>
+                    <ul>
+                        <li><input type="checkbox" class="task-checkbox"> Setup Instagram Business account integration</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement Graph API webhook receiver</li>
+                        <li><input type="checkbox" class="task-checkbox"> Build message parser & sender</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add story reply support</li>
+                        <li><input type="checkbox" class="task-checkbox"> Test with real Instagram account</li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 3.2: Billing & Subscription Management <span class="badge badge-prod">PRODUCTION</span></h3>
+                    <ul>
+                        <li><input type="checkbox" class="task-checkbox"> Integrate payment gateway (Stripe/PayPal)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement usage-based billing (tokens, messages)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Create subscription plans (Starter, Pro, Enterprise)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Build billing dashboard (invoices, usage, payments)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add auto-suspend for unpaid accounts</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement usage alerts & quotas</li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 3.3: Advanced AI Features <span class="badge badge-prod">PRODUCTION</span></h3>
+                    <ul>
+                        <li><input type="checkbox" class="task-checkbox"> Add multi-language support (i18n for chatbot responses)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement sentiment analysis (track customer satisfaction)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Build chatbot personality customization (tone, style)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add proactive messaging (trigger-based notifications)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement handoff to human agents</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add A/B testing for prompts & responses</li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 3.4: Enterprise Features <span class="badge badge-prod">PRODUCTION</span></h3>
+                    <ul>
+                        <li><input type="checkbox" class="task-checkbox"> Implement SSO (SAML, OAuth)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add audit logging (all admin actions)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Build compliance reports (GDPR data export, right to deletion)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Create white-label customization (branding, domain)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add advanced RBAC (custom roles, permissions)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement data retention policies</li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 3.5: High Availability & Scaling <span class="badge badge-prod">PRODUCTION</span></h3>
+                    <ul>
+                        <li><input type="checkbox" class="task-checkbox"> Deploy to AWS multi-AZ (or Azure/GCP equivalent)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement auto-scaling (ECS/EKS)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add load balancer (ALB/NLB)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Setup cross-region DB replication</li>
+                        <li><input type="checkbox" class="task-checkbox"> Implement disaster recovery plan (RTO < 1hr, RPO < 5min)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add CDN for static assets (CloudFront)</li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 3.6: Vector DB Upgrade (FAISS → Qdrant) <span class="badge badge-prod">PRODUCTION</span></h3>
+                    <ul>
+                        <li><input type="checkbox" class="task-checkbox"> Evaluate Qdrant vs Weaviate vs Pinecone</li>
+                        <li><input type="checkbox" class="task-checkbox"> Setup Qdrant cluster (or managed service)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Migrate existing FAISS indexes to Qdrant</li>
+                        <li><input type="checkbox" class="task-checkbox"> Update RAG pipeline to use Qdrant</li>
+                        <li><input type="checkbox" class="task-checkbox"> Benchmark performance (latency, accuracy)</li>
+                        <li><input type="checkbox" class="task-checkbox"> Add vector search filtering (metadata, date range)</li>
+                    </ul>
+                </div>
+
+                <div class="risk-section">
+                    <h4>⚠️ Production Risks & Mitigation</h4>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>Scaling costs:</strong> Optimize LLM usage (caching, smaller models), monitor cloud costs daily</li>
+                        <li><strong>Data compliance:</strong> Legal review for GDPR/SOC 2, implement data localization</li>
+                        <li><strong>Customer churn:</strong> Prioritize UX improvements, build customer success team</li>
+                        <li><strong>Competition:</strong> Focus on Vietnamese market, deep Zalo integration, on-prem deployment</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="work-breakdown">
+            <h2>📋 Work Breakdown Structure (WBS)</h2>
+            <p>Detailed breakdown of all deliverables and their dependencies</p>
+        </div>
+        
+        <div class="section-header">
+            <h2>📋 Key Deliverables & Documentation</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Phase</th>
+                        <th>Technical Deliverables</th>
+                        <th>Documentation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>POC</strong></td>
+                        <td>
+                            • Docker Compose setup<br>
+                            • Basic admin dashboard<br>
+                            • Zalo integration<br>
+                            • RAG chatbot with 2+ tools
+                        </td>
+                        <td>
+                            • Getting Started guide<br>
+                            • API reference (basic)<br>
+                            • Docker deployment guide<br>
+                            • Tool definition examples
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>MVP</strong></td>
+                        <td>
+                            • .deb/.rpm packages<br>
+                            • Facebook integration<br>
+                            • Full admin dashboard<br>
+                            • Monitoring (Prometheus/Grafana)<br>
+                            • PostgreSQL + Redis
+                        </td>
+                        <td>
+                            • Architecture deep-dive<br>
+                            • On-prem installation guide<br>
+                            • Multi-tenant setup<br>
+                            • Security & compliance docs<br>
+                            • API reference (complete)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Production</strong></td>
+                        <td>
+                            • Instagram integration<br>
+                            • Billing system<br>
+                            • Multi-region deployment<br>
+                            • Qdrant vector DB<br>
+                            • Auto-scaling infrastructure
+                        </td>
+                        <td>
+                            • Enterprise deployment guide<br>
+                            • Scaling & performance tuning<br>
+                            • Billing & subscription docs<br>
+                            • DR & backup procedures<br>
+                            • Customer onboarding playbook
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="summary">
+            <h2>🎯 Critical Success Factors</h2>
+            <ul style="margin-left: 20px; margin-top: 15px;">
+                <li><strong>Focus on Vietnamese market first:</strong> Zalo is priority #1 (200M+ users), then Facebook Messenger</li>
+                <li><strong>Keep POC simple:</strong> Use simplest tech stack (SQLite, FAISS, Docker) to move fast</li>
+                <li><strong>Validate with real customers early:</strong> Get 3-5 pilot customers by end of POC</li>
+                <li><strong>Balance cost vs capability:</strong> Use GPT-4o-mini for POC, optimize later with local models</li>
+                <li><strong>On-prem is differentiator:</strong> Many Vietnamese SMEs prefer on-prem → .deb/.rpm is essential</li>
+                <li><strong>Monitor AI quality religiously:</strong> Track RAG accuracy, tool call success rate, user satisfaction</li>
+                <li><strong>Build for multi-tenancy from day 1:</strong> Tenant isolation cannot be retrofitted easily</li>
+            </ul>
+        </div>
+
+        <div class="section-header">
+            <h2>📚 Technical Glossary</h2>
+            <p>Definitions of key technical terms used in this project</p>
+        </div>
+        
+        <div class="tech-grid">
+            <div class="tech-card">
+                <h4><strong>RAG</strong> (Retrieval-Augmented Generation)</h4>
+                <p>A framework that enables LLMs to access external knowledge sources. The system retrieves relevant documents and provides them as context for the model to generate accurate, fact-based responses.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>LangChain</strong></h4>
+                <p>An open-source framework for developing applications powered by language models. Provides building blocks for chains, agents, and memory.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>LangGraph</strong></h4>
+                <p>An extension to LangChain that enables creating stateful, multi-actor applications with cyclic behavior. Essential for conversation memory and agent workflows.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>FAISS</strong> (Facebook AI Similarity Search)</h4>
+                <p>A library for efficient similarity search and clustering of dense vectors. Ideal for POC with small-scale deployments.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>Qdrant</strong></h4>
+                <p>A cloud-native vector similarity engine optimized for low latency and high throughput. Supports filtering, metadata storage, and clustering.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>MCP</strong> (Model Context Protocol)</h4>
+                <p>An open protocol for connecting AI models to external tools and data sources. Enables standardized integration with third-party services.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>Vector Database</strong></h4>
+                <p>A database that stores and queries data in vector format (embeddings). Enables semantic search based on meaning rather than exact keyword matching.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>Embeddings</strong></h4>
+                <p>Numerical representations of text that capture semantic meaning. Similar texts have similar vector representations, enabling similarity search.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>Function Calling</strong></h4>
+                <p>A capability where LLMs can identify when to call external functions/tools and what parameters to pass. Enables automation of complex workflows.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>Multi-Tenancy</strong></h4>
+                <p>Architecture pattern where a single instance serves multiple customers (tenants), with data logically isolated per tenant.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>Webhook</strong></h4>
+                <p>Callback mechanism where the server pushes data to a client URL when an event occurs. Enables real-time event-driven architecture.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>Docker Compose</strong></h4>
+                <p>Tool for defining and running multi-container applications. Simplifies development and testing with single-file configuration.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>Rate Limiting</strong></h4>
+                <p>Mechanism to restrict API request frequency. Protects against abuse and manages resource allocation fairly.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>Token Bucket Algorithm</strong></h4>
+                <p>Rate limiting strategy where requests consume tokens from a bucket that refills over time. Smoothes traffic bursts.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>Celery</strong></h4>
+                <p>Distributed task queue based on Python, message passing, and worker processes. Handles long-running tasks asynchronously.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>Redis</strong></h4>
+                <p>In-memory data structure store used for caching, session storage, and message queues. Provides sub-millisecond access.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>PostgreSQL</strong></h4>
+                <p>Advanced relational database with JSONB support, full-text search, and row-level security. Production-ready for multi-tenant scenarios.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>SQLAlchemy</strong></h4>
+                <p>Python SQL toolkit and ORM. Provides database abstraction, migrations (Alembic), and connection pooling.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>FastAPI</strong></h4>
+                <p>Modern web framework for building APIs with Python. Provides automatic docs, async support, and type hints.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>React</strong></h4>
+                <p>JavaScript library for building user interfaces. Virtual DOM, component-based, and declarative.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>Vite</strong></h4>
+                <p>Next-generation frontend tooling. Provides instant server start, HMR, and optimized builds.</p>
+            </div>
+        </div>
+
+        <div class="tech-stack">
+            <h2>🚢 Deployment Options</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Option</th>
+                        <th>Best For</th>
+                        <th>Cost</th>
+                        <th>Complexity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Docker Compose</strong></td>
+                        <td>Development, Testing, On-Prem SMEs</td>
+                        <td>Free (self-hosted)</td>
+                        <td>Low</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AWS EKS</strong></td>
+                        <td>Cloud scale, Enterprise</td>
+                        <td>Pay per resource</td>
+                        <td>Medium-High</td>
+                    </tr>
+                    <tr>
+                        <td><strong>.deb/.rpm Packages</strong></td>
+                        <td>On-Prem deployments</td>
+                        <td>Free</td>
+                        <td>Medium</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer>
+        <p><strong>SC Chatbot Project Plan</strong> | Last Updated: May 2026 | Version 1.0</p>
+        <p><a href="table-of-contents.html" style="color: #667eea;">← Back to Documentation</a></p>
+    </footer>
+</body>
+</html>

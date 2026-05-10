@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security - SC Chatbot</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; margin-bottom: 20px; }
+        header h1 { font-size: 2rem; }
+        a { color: #667eea; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .card { background: white; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { color: #667eea; margin-bottom: 15px; }
+        h3 { color: #764ba2; margin: 25px 0 10px 0; }
+        pre { background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; }
+        code { font-family: 'Courier New', monospace; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-top: 10px; }
+        .badge-planned { background: #fff3e0; color: #f57c00; }
+        .back-link { display: inline-block; background: #667eea; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; margin-bottom: 20px; }
+        ul, ol { margin-left: 20px; margin-top: 10px; }
+        li { margin-bottom: 8px; }
+        .tip { background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #9c27b0; }
+        .warning { background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #f57c00; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🔒 Security Best Practices</h1>
+    </header>
+    <div class="container">
+        <a href="../team/onboarding.html" class="back-link">← Back to Team</a>
+        
+        <div class="card">
+            <h2>Security Overview</h2>
+            <p>SC Chatbot follows industry-standard security practices to protect user data, maintain API integrity, and ensure compliance with regulations.</p>
+            <span class="badge badge-planned">Planned</span>
+        </div>
+
+        <div class="card">
+            <h2>Authentication & Authorization</h2>
+            <h3>JWT Authentication</h3>
+            <p>The system uses JSON Web Tokens (JWT) for stateless authentication:</p>
+            <ul>
+                <li><strong>Access Token:</strong> Short-lived (15 minutes), used for API requests</li>
+                <li><strong>Refresh Token:</strong> Long-lived (7 days), used to get new access tokens</li>
+                <li><strong>Role-based Access Control (RBAC):</strong> Super Admin, Tenant Admin, Agent roles</li>
+            </ul>
+            
+            <h3>Token Structure</h3>
+            <pre><code><span class="code"># JWT Payload Example
+{
+  "sub": "user_12345",
+  "tenant_id": "tenant_abc",
+  "role": "tenant_admin",
+  "permissions": [
+    "knowledge:read",
+    "knowledge:write",
+    "tools:manage",
+    "analytics:view"
+  ],
+  "exp": 1715683200,
+  "iat": 1715679600
+}</code></pre>
+            
+            <h3>Authentication Flow</h3>
+            <pre><code><span class="code"># Login and get tokens
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "secure_password"
+}
+
+# Response
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "def50200d85c...",
+  "token_type": "Bearer",
+  "expires_in": 900
+}
+
+# Use access token for API requests
+GET /api/knowledge
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</code></pre>
+            
+            <h3>Refresh Token Rotation</h3>
+            <pre><code><span class="code"># Rotate refresh tokens on each use
+POST /api/auth/refresh
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+# Response
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "def50200d85c_new_token...",
+  "expires_in": 604800
+}</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>API Security</h2>
+            <h3>Rate Limiting</h3>
+            <p>Protect against abuse with rate limiting:</p>
+            <ul>
+                <li><strong>Standard API:</strong> 100 requests/minute per tenant</li>
+                <li><strong>Authentication endpoint:</strong> 10 attempts/hour (prevents brute force)</li>
+                <li><strong>Rate limit headers:</strong> X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After</li>
+            </ul>
+            
+            <h3>Rate Limit Implementation</h3>
+            <pre><code><span class="code"># FastAPI rate limiting example
+from aiolimiter import AsyncTokenBucket
+from fastapi import Request, HTTPException
+from functools import wraps
+
+# Token bucket limiter
+rate_limiter = AsyncTokenBucket(100, 1)  # 100/min
+
+async def rate_limit_middleware(request: Request):
+    """Rate limit middleware for FastAPI."""
+    async with rate_limiter:
+        return await call_next(request)
+
+# Or use per-tenant rate limiting
+class TenantRateLimiter:
+    def __init__(self, default_rpm: int = 100):
+        self.limiter = AsyncTokenBucket(default_rpm, 1)
+        self.tenant_limits = {}
+    
+    async def check_tenant_rate_limit(self, tenant_id: str):
+        """Check and consume rate limit for tenant."""
+        async with self.limiter:
+            # Additional per-tenant quota
+            pass
+
+# Response with rate limit headers
+@app.get("/api/health")
+async def health_check():
+    response = {"status": "healthy"}
+    response.headers["X-RateLimit-Limit"] = "100"
+    response.headers["X-RateLimit-Remaining"] = "99"
+    response.headers["X-RateLimit-Reset"] = "1640995200"
+    return response</code></pre>
+            
+            <h3>Input Validation</h3>
+            <p>Use Pydantic models for strict input validation:</p>
+            <pre><code><span class="code"># Pydantic model for request validation
+from pydantic import BaseModel, Field, EmailStr, validator
+from typing import Optional, List
+
+class ChatMessageRequest(BaseModel):
+    """Request model for chat messages."""
+    message: str = Field(..., min_length=1, max_length=10000)
+    channel: str = Field(..., pattern=r"^(web|zalo|facebook|instagram)$")
+    order_id: Optional[str] = Field(None, max_length=50)
+    
+    @validator('message')
+    def sanitize_message(cls, v):
+        # Remove potentially dangerous patterns
+        dangerous_patterns = ['</script>', '<script>', 'javascript:', 'onerror']
+        for pattern in dangerous_patterns:
+            v = v.replace(pattern, '')
+        return v
+
+# Usage
+@app.post("/api/chat/messages")
+async def send_message(request: ChatMessageRequest):
+    # Process validated request
+    pass</code></pre>
+            
+            <h3>API Key Management</h3>
+            <ul>
+                <li><strong>Rotate keys:</strong> Change API keys periodically (90 days)</li>
+                <li><strong>Scope keys:</strong> Use least-privilege principle</li>
+                <li><strong>Store securely:</strong> Never commit secrets to Git</li>
+                <li><strong>Environment variables:</strong> Use .env files in .gitignore</li>
+            </ul>
+            
+            <h3>Secrets Management</h3>
+            <pre><code><span class="code"># Example .env file (add to .gitignore)
+OPENAI_API_KEY=sk-...
+ZALO_CLIENT_ID=zalo_client_id
+ZALO_CLIENT_SECRET=zalo_client_secret
+JWT_SECRET=very_secure_random_string_here
+DATABASE_URL=postgresql://user:password@host:5432/dbname
+
+# Use python-dotenv for loading
+from dotenv import load_dotenv
+load_dotenv()</code></pre>
+            
+            <h3>Secrets Best Practices</h3>
+            <ul>
+                <li>Use HashiCorp Vault or AWS Secrets Manager for production</li>
+                <li>Never log secrets or sensitive data</li>
+                <li>Use environment variables for all secrets</li>
+                <li>Rotate credentials regularly</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>Webhook Security</h2>
+            <h3>Signature Verification</h3>
+            <p>Verify webhook signatures to prevent unauthorized requests:</p>
+            
+            <pre><code><span class="code"># Zalo webhook signature verification
+def verify_zalo_signature(payload: str, signature_key: str, signature: str) -> bool:
+    """Verify Zalo webhook signature."""
+    import hmac
+    import hashlib
+    import base64
+    
+    # Compute expected signature
+    message = payload + signature_key
+    expected_signature = base64.b64encode(
+        hashlib.sha256(message.encode()).digest()
+    ).decode()
+    
+    # Compare using constant-time comparison
+    return hmac.compare_digest(expected_signature, signature)
+
+# Facebook webhook verification
+def verify_facebook_signature(timestamp: str, body: str, verify_token: str, signature: str) -> bool:
+    """Verify Facebook webhook signature."""
+    import hmac
+    import hashlib
+    
+    # Create HMAC
+    hmac_input = f"{timestamp}\n{body}".encode('utf-8')
+    expected_signature = hmac.new(
+        verify_token.encode('utf-8'),
+        hmac_input,
+        hashlib.sha256
+    ).hexdigest()
+    
+    # Constant-time comparison
+    return hmac.compare_digest(
+        expected_signature.lower(),
+        signature.lower()
+    )</code></pre>
+            
+            <h3>Webhook Validation Flow</h3>
+            <ol>
+                <li>Receive webhook request</li>
+                <li>Extract signature from headers</li>
+                <li>Verify signature against payload + secret</li>
+                <li>Process valid webhook</li>
+                <li>Return 401 for invalid signatures</li>
+            </ol>
+            
+            <h3>Testing Webhooks</h3>
+            <pre><code><span class="code"># Send test webhook with curl
+curl -X POST https://graph.facebook.com/v18.0/{page-id}/messages \
+  -H "Authorization: Bearer PAGE_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messaging_persons": [{"id": "+1234567890"}],
+    "text": "Test message",
+    "attachments": [{
+      "type": "template",
+      "payload": {
+        "template_type": "generic",
+        "template_name": "quick_reply_list",
+        "data": {...}
+      }
+    }]
+  }'</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Audit Logging</h2>
+            <p>Log all sensitive operations for compliance and debugging:</p>
+            
+            <h3>Log Structure</h3>
+            <pre><code><span class="code"># Audit log entry structure
+{
+  "timestamp": "2024-05-10T15:30:00Z",
+  "event_type": "knowledge.upload",
+  "user_id": "user_12345",
+  "tenant_id": "tenant_abc",
+  "action": "uploaded",
+  "details": {
+    "document_id": "doc_faq_001",
+    "file_size": "2.5 MB",
+    "chunks_created": 85
+  }
+}</code></pre>
+            
+            <h3>Log Categories</h3>
+            <ul>
+                <li><strong>Authentication:</strong> Login, logout, token refresh</li>
+                <li><strong>Configuration:</strong> Tool definition, channel setup</li>
+                <li><strong>Knowledge:</strong> Document upload, deletion, modification</li>
+                <li><strong>User Actions:</strong> Admin actions, role changes</li>
+            </ul>
+            
+            <h3>Logging Implementation</h3>
+            <pre><code><span class="code"># Audit logging with Python
+import logging
+from datetime import datetime
+from typing import Optional
+
+class AuditLogger:
+    """Audit logger for compliance tracking."""
+    
+    def __init__(self, logger_name: str):
+        self.logger = logging.getLogger(logger_name)
+    
+    def log_event(
+        self,
+        event_type: str,
+        user_id: str,
+        tenant_id: str,
+        action: str,
+        details: dict
+    ):
+        """Log audit event."""
+        log_entry = {
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "event_type": event_type,
+            "user_id": user_id,
+            "tenant_id": tenant_id,
+            "action": action,
+            "details": details
+        }
+        self.logger.info(f"Audit: {event_type}", extra=log_entry)</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Security Checklist</h2>
+            <ul>
+                <li><strong>Authentication:</strong> JWT tokens with refresh rotation</li>
+                <li><strong>Authorization:</strong> RBAC with role-based permissions</li>
+                <li><strong>Rate Limiting:</strong> Token bucket algorithm per tenant</li>
+                <li><strong>Input Validation:</strong> Pydantic models for all requests</li>
+                <li><strong>Secrets:</strong> Environment variables, never in code</li>
+                <li><strong>Webhooks:</strong> Signature verification on all incoming webhooks</li>
+                <li><strong>Audit:</strong> Log all configuration changes</li>
+                <li><strong>HTTPS:</strong> All endpoints use TLS 1.2+</li>
+                <li><strong>Headers:</strong> Security headers (CSP, X-Frame-Options)</li>
+            </ul>
+            
+            <div class="warning">⚠️ <strong>Important:</strong> Never commit API keys or secrets to version control. Use environment variables or a secrets manager.</div>
+        </div>
+
+        <div class="card">
+            <h2>Next Steps</h2>
+            <ul>
+                <li><a href="monitoring.html">Review monitoring setup</a></li>
+                <li><a href="../guides/channel-integration.html">Learn about webhook security</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

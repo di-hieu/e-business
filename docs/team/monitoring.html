@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring - SC Chatbot</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; margin-bottom: 20px; }
+        header h1 { font-size: 2rem; }
+        a { color: #667eea; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .card { background: white; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { color: #667eea; margin-bottom: 15px; }
+        h3 { color: #764ba2; margin: 25px 0 10px 0; }
+        pre { background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; }
+        code { font-family: 'Courier New', monospace; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .badge-planned { background: #fff3e0; color: #f57c00; }
+        .back-link { display: inline-block; background: #667eea; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; margin-bottom: 20px; }
+        ul, ol { margin-left: 20px; margin-top: 10px; }
+        li { margin-bottom: 8px; }
+        .tip { background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #9c27b0; }
+        .warning { background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #f57c00; }
+        .metric-card { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 15px 0; }
+        .metric-item { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 15px; border-radius: 8px; }
+        .metric-item h4 { color: #333; font-size: 0.95rem; }
+        .metric-item p { font-size: 0.85rem; color: #555; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📊 Monitoring & Observability</h1>
+    </header>
+    <div class="container">
+        <a href="../team/onboarding.html" class="back-link">← Back to Team</a>
+        
+        <div class="card">
+            <h2>Monitoring Overview</h2>
+            <p>Monitoring is essential for maintaining a healthy, reliable AI chatbot platform. This guide covers metrics, logging, tracing, and alerting.</p>
+            <span class="badge badge-planned">Planned</span>
+        </div>
+
+        <div class="card">
+            <h2>Key Metrics</h2>
+            <p>Track these metrics to understand system health and user behavior:</p>
+            
+            <div class="metric-card">
+                <div class="metric-item">
+                    <h4>Response Time (p95 < 1s)</h4>
+                    <p>Time from user message to bot response. Critical for user experience.</p>
+                </div>
+                <div class="metric-item">
+                    <h4>Tokens per Conversation</h4>
+                    <p>Track API usage for billing and cost optimization.</p>
+                </div>
+                <div class="metric-item">
+                    <h4>Daily Queries</h4>
+                    <p>Volume of chatbot interactions per tenant.</p>
+                </div>
+                <div class="metric-item">
+                    <h4>Conversion Rate</h4>
+                    <p>Chat-to-order conversion tracking.</p>
+                </div>
+                <div class="metric-item">
+                    <h4>CSAT Scores</h4>
+                    <p>Customer satisfaction from feedback.</p>
+                </div>
+                <div class="metric-item">
+                    <h4>Error Rate</h4>
+                    <p>API failures, LLM errors, rate limits.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Infrastructure Monitoring</h2>
+            <p>Production monitoring additions:</p>
+            
+            <h3>Prometheus Metrics</h3>
+            <p><strong>What it is:</strong> Open-source metrics collection and time-series database.</p>
+            <p><strong>Why use it:</strong> Industry standard, powerful querying (PromQL), integrates with Grafana.</p>
+            <p><strong>Metrics to expose:</strong></p>
+            <ul>
+                <li><code>http_requests_total</code>: Total HTTP requests</li>
+                <li><code>chatbot_responses_total</code>: Bot response count</li>
+                <li><code>llm_calls_total</code>: LLM API calls</li>
+                <li><code>tool_calls_total</code>: Function calls executed</li>
+                <li><code>response_time_seconds</code>: API response time</li>
+                <li><code>error_rate_total</code>: Error count by type</li>
+            </ul>
+            
+            <h3>Grafana Dashboards</h3>
+            <p><strong>What it is:</strong> Visualization platform for metrics data.</p>
+            <p><strong>Why use it:</strong> Create beautiful dashboards, alert on thresholds, share with team.</p>
+            
+            <h3>OpenTelemetry</h3>
+            <p><strong>What it is:</strong> Observability standard for collecting telemetry data.</p>
+            <p><strong>Why use it:</strong> Distributed tracing, unified format, integrates with Prometheus.</p>
+            
+            <h3>Structured Logging</h3>
+            <p><strong>What it is:</strong> JSON-formatted logs for easy parsing.</p>
+            <p><strong>Why use it:</strong> Better than plain text, queryable with ELK stack.</p>
+        </div>
+
+        <div class="card">
+            <h2>Metrics Implementation</h2>
+            <h3>Prometheus Metrics in FastAPI</h3>
+            <pre><code><span class="code"># Install Prometheus client
+pip install prometheus-client
+
+# In FastAPI app.py
+from fastapi import FastAPI
+from prometheus_client import generate_latest, COLLECTORS
+
+# Create app
+app = FastAPI()
+
+# Enable default collectors
+# For production, be selective about which metrics to expose
+# COLLECTORS = ["prometheus"]
+
+# Custom metrics
+from prometheus_client import Counter, Histogram, Gauge
+
+chatbot_responses = Counter(
+    "chatbot_responses_total",
+    "Total chatbot responses generated",
+    labels=["status", "channel"]
+)
+
+response_time = Histogram(
+    "chatbot_response_time_seconds",
+    "Response time for chatbot in seconds",
+    buckets=[0.1, 0.5, 1.0, 2.0, 5.0, 10.0]
+)
+
+llm_calls = Counter(
+    "llm_calls_total",
+    "Total LLM API calls",
+    labels=["provider", "model"]
+)
+
+tool_calls = Counter(
+    "tool_calls_total",
+    "Total tool function calls",
+    labels=["tool_name", "result"]
+)
+
+# Health endpoint
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
+
+# Metrics endpoint
+@app.get("/metrics")
+async def metrics():
+    return generate_latest()
+
+# Example handler with metrics
+@app.post("/chat/messages")
+async def chat_handler(message: dict):
+    # Start timer
+    with response_time.time():
+        # Call LLM
+        response = await call_llm(message)
+        
+        # Record response
+        chatbot_responses.labels(status="success", channel=message.get("channel")).inc()
+        
+        # Record tool calls
+        if message.get("tools_called"):
+            for tool in message["tools_called"]:
+                tool_calls.labels(
+                    tool_name=tool["name"],
+                    result=tool.get("status", "success")
+                ).inc()
+    
+    return response</code></pre>
+            
+            <h3>Logging with Python</h3>
+            <pre><code><span class="code"># Structured logging setup
+import logging
+from datetime import datetime
+import json
+
+# Configure root logger
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+
+# Custom JSON formatter
+class JSONFormatter(logging.Formatter):
+    def format(self, record):
+        log_dict = {
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "logger": record.name,
+            "level": record.levelname,
+            "message": record.getMessage(),
+            "module": record.module,
+            "function": record.funcName,
+            "line": record.lineno
+        }
+        # Add custom fields if using extra
+        if hasattr(record, "tenant_id"):
+            log_dict["tenant_id"] = record.tenant_id
+        if hasattr(record, "user_id"):
+            log_dict["user_id"] = record.user_id
+        return json.dumps(log_dict)
+
+# Set up logger
+logger = logging.getLogger("sc_chatbot")
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+handler.setFormatter(JSONFormatter())
+logger.addHandler(handler)
+
+# Example usage
+logger.info("Chatbot initialized", extra={"tenant_id": "tenant_123"})
+logger.warning("Rate limit approaching", extra={"tenant_id": "tenant_123", "requests_remaining": 10})</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Alerting Setup</h2>
+            <h3>Alert Rules</h3>
+            <p>Configure alerts to notify about issues:</p>
+            
+            <pre><code><span class="code"># Example alert rules (alertmanager.yml or Prometheus config)
+
+groups:
+  - name: chatbot-alerts
+    rules:
+      # High error rate
+      - alert: HighErrorRate
+        expr: rate(http_requests_total[5m]) / sum(rate(http_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }}% for the last 5 minutes"
+          
+      # Slow response times
+      - alert: SlowResponses
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow response times"
+          description: "p95 response time is {{ $value }}s"
+          
+      # LLM API failures
+      - alert: LLMAPIErrors
+        expr: rate(llm_api_errors_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "LLM API errors detected"
+          description: "LLM API is experiencing errors"
+          
+      # Rate limit exceeded
+      - alert: RateLimitExceeded
+        expr: rate(rate_limit_rejected_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Rate limits being hit"
+          description: "Clients are hitting rate limits"</code></pre>
+            
+            <h3>Notification Channels</h3>
+            <ul>
+                <li><strong>Slack:</strong> Instant team notifications</li>
+                <li><strong>Email:</strong> Critical alerts only</li>
+                <li><strong>PagerDuty:</strong> On-call rotation</li>
+                <li><strong>Webhook:</strong> Custom integrations</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>Tracing with OpenTelemetry</h2>
+            <p>Track requests across services and identify bottlenecks:</p>
+            
+            <h3>Tracing Example</h3>
+            <pre><code><span class="code"># Install OpenTelemetry
+pip install opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp
+
+# Initialize tracer
+from opentelemetry import trace
+from opentelemetry.trace import set_tracer_provider
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+
+# Setup tracing
+provider = TracerProvider()
+processor = BatchSpanProcessor(OTLPSpanExporter())
+provider.add_span_processor(processor)
+set_tracer_provider(provider)
+
+# Create tracer
+tracer = trace.get_tracer(__name__)
+
+# Use in chat handler
+@app.post("/chat/messages")
+async def chat_handler(message: dict):
+    with tracer.start_as_current_span("chat_request") as span:
+        span.set_attributes({
+            "tenant_id": message.get("tenant_id"),
+            "message_length": len(message.get("message", ""))
+        })
+        
+        # Call downstream services
+        response = await call_llm(message)
+        
+    return response</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Monitoring Checklist</h2>
+            <ul>
+                <li><strong>Health endpoint:</strong> <code>/health</code> returns system status</li>
+                <li><strong>Metrics endpoint:</strong> <code>/metrics</code> exposes Prometheus format</li>
+                <li><strong>Structured logs:</strong> JSON format with consistent fields</li>
+                <li><strong>Distributed tracing:</strong> Track requests end-to-end</li>
+                <li><strong>Alerting:</strong> Notify on errors and performance issues</li>
+                <li><strong>Dashboard:</strong> Visual overview in Grafana</li>
+                <li><strong>Log aggregation:</strong> Centralize logs with ELK or Loki</li>
+            </ul>
+            
+            <div class="tip">💡 <strong>Tip:</strong> Start simple with Prometheus metrics. Add Grafana and tracing as you need them. Don't over-monitor in POC phase.</div>
+        </div>
+
+        <div class="card">
+            <h2>Next Steps</h2>
+            <ul>
+                <li><a href="security.html">Review security best practices</a></li>
+                <li><a href="../deployment/docker.html">Setup Docker monitoring stack</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

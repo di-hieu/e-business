@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Tenant Setup - SC Chatbot</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; margin-bottom: 20px; }
+        header h1 { font-size: 2rem; }
+        a { color: #667eea; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .card { background: white; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { color: #667eea; margin-bottom: 15px; }
+        h3 { color: #764ba2; margin: 25px 0 10px 0; }
+        pre { background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; }
+        code { font-family: 'Courier New', monospace; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-top: 10px; }
+        .badge-poc { background: #e3f2fd; color: #1976d2; }
+        .badge-mvp { background: #f3e5f5; color: #7b1fa2; }
+        .badge-planned { background: #fff3e0; color: #f57c00; }
+        .badge-done { background: #c8e6c9; color: #2e7d32; }
+        .back-link { display: inline-block; background: #667eea; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; margin-bottom: 20px; }
+        ul, ol { margin-left: 20px; margin-top: 10px; }
+        li { margin-bottom: 8px; }
+        .tip { background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #9c27b0; }
+        .warning { background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #f57c00; }
+        .table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        .table th, .table td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        .table th { background: #667eea; color: white; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🏢 Multi-Tenant Setup Guide</h1>
+    </header>
+    <div class="container">
+        <a href="../table-of-contents.html" class="back-link">← Back to Documentation</a>
+        
+        <div class="card">
+            <h2>Overview</h2>
+            <p>Multi-tenancy is a critical architectural feature for SaaS platforms like SC Chatbot. This guide covers tenant isolation strategies, data separation, and setup procedures for deploying multi-tenant instances.</p>
+            <span class="badge badge-planned">Planned</span>
+        </div>
+
+        <div class="card">
+            <h2>Understanding Multi-Tenancy</h2>
+            <h3>What is Multi-Tenancy?</h3>
+            <p>Multi-tenancy is an architectural pattern where a single instance of software serves multiple customers (tenants) while keeping their data logically isolated. This approach offers several advantages:</p>
+            <ul>
+                <li><strong>Cost Efficiency:</strong> Share infrastructure and reduce operational costs</li>
+                <li><strong>Easier Maintenance:</strong> Update once, all tenants benefit</li>
+                <li><strong>Scalability:</strong> Horizontal scaling serves all tenants simultaneously</li>
+                <li><strong>Data Privacy:</strong> Tenant data is isolated and secure</li>
+            </ul>
+            
+            <h3>Tenant Isolation Strategies</h3>
+            <table>
+                <tr><th>Strategy</th><th>Isolation Level</th><th>Use Case</th></tr>
+                <tr><td><strong>Schema-per-tenant</strong></td><td>Database-level</td><td>Enterprise tenants, high compliance needs</td></tr>
+                <tr><td><strong>Shared DB, separate schema</strong></td><td>Mid-level</td><td>Medium-scale deployments</td></tr>
+                <tr><td><strong>Shared DB, tenant_id column</strong></td><td>Application-level</td><td>POC/MVP phase (our approach)</td></tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Tenant Data Isolation</h2>
+            <h3>Database-Level Isolation</h3>
+            <p>In our POC phase, we use SQLite with tenant_id filtering. For production with PostgreSQL:</p>
+            
+            <h4>SQLite (POC)</h4>
+            <pre><code><span class="code"># All tables share same database, filtered by tenant_id
+CREATE TABLE conversations (
+    id INTEGER PRIMARY KEY,
+    tenant_id TEXT NOT NULL,
+    user_id TEXT,
+    message TEXT,
+    response TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+);
+
+CREATE TABLE tenants (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    api_key TEXT UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- All queries must include tenant filter
+SELECT * FROM conversations WHERE tenant_id = ?;</code></pre>
+            
+            <h4>PostgreSQL (Production)</h4>
+            <pre><code><span class="code"># Tenant-isolated with Row Level Security
+CREATE TABLE conversations (
+    id SERIAL PRIMARY KEY,
+    tenant_id UUID NOT NULL,
+    user_id TEXT,
+    message TEXT,
+    response TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Enable Row Level Security
+ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
+
+-- Create tenant policy
+CREATE POLICY tenant_isolation ON conversations
+    USING (tenant_id = CURRENT_setting('app.current_tenant_id'));
+
+-- Separate schema option
+CREATE SCHEMA tenant_1;
+CREATE SCHEMA tenant_2;
+
+-- Tenant-specific tables
+CREATE TABLE tenant_1.conversations (
+    id SERIAL, message TEXT, ...
+);</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Vector Store Isolation</h2>
+            <h3>FAISS (POC)</h3>
+            <p>Each tenant gets their own FAISS index file:</p>
+            <pre><code><span class="code"># Tenant-specific FAISS indexes
+tenants/
+├── tenant_abc123/
+│   └── tenant_abc123.faiss
+├── tenant_def456/
+│   └── tenant_def456.faiss
+└── tenant_ghi789/
+    └── tenant_ghi789.faiss</code></pre>
+            
+            <h3>Qdrant (Production)</h3>
+            <pre><code><span class="code"># Qdrant collections per tenant
+POST /collections
+{
+    "name": "tenant_abc123",
+    "vectors": {
+        "size": 384,
+        "distance": "Cosine"
+    }
+}
+
+# Query with tenant filter
+POST /collections/tenant_abc123/points/search
+{
+    "vector": [0.1, 0.2, ...],
+    "top_k": 5,
+    "with_payload": true
+}</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Setup Steps</h2>
+            <h3>Step 1: Create a Tenant</h3>
+            <p>Use the admin API or dashboard to create a new tenant:</p>
+            <pre><code><span class="code"># Create tenant via API
+curl -X POST http://localhost:8000/api/tenants \
+  -H "Authorization: Bearer ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "ACME Corporation",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "settings": {
+      "llm_provider": "openai",
+      "model": "gpt-4o-mini",
+      "language": "vi"
+    }
+  }'
+
+# Response
+{
+    "tenant_id": "abc123def456",
+    "api_key": "sk_live_...",
+    "name": "ACME Corporation",
+    "status": "active",
+    "created_at": "2024-01-15T10:30:00Z"
+}</code></pre>
+            
+            <h3>Step 2: Configure Tenant Settings</h3>
+            <pre><code><span class="code"># Update tenant configuration
+PUT http://localhost:8000/api/tenants/abc123/settings \
+  -H "Authorization: Bearer TENANT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "llm_provider": "openai",
+    "model": "gpt-4o-mini",
+    "embedding_model": "all-MiniLM-L6-v2",
+    "max_tokens_per_message": 5000,
+    "temperature": 0.7,
+    "response_style": "professional",
+    "language": "vi",
+    "supported_channels": ["zalo", "facebook"]
+  }'</code></pre>
+            
+            <h3>Step 3: Upload Knowledge Base</h3>
+            <pre><code><span class="code"># Upload documents for tenant
+curl -X POST http://localhost:8000/api/tenants/abc123/knowledge/upload \
+  -H "Authorization: Bearer TENANT_API_KEY" \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@faq.pdf" \
+  -F "source="faq"
+
+# Upload via API with metadata
+curl -X POST http://localhost:8000/api/tenants/abc123/knowledge/import \
+  -H "Authorization: Bearer TENANT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "documents": [
+      {
+        "source": "product-catalog",
+        "url": "https://example.com/products",
+        "chunk_size": 500,
+        "chunk_overlap": 50
+      }
+    ]
+  }'</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Middleware for Tenant Isolation</h2>
+            <h3>Extract Tenant from Request</h3>
+            <pre><code><span class="code"># FastAPI middleware to extract tenant ID
+from fastapi import Request, Header, HTTPException
+from fastapi.middleware.base import BaseHTTPMiddleware
+from typing import Callable
+
+async def tenant_middleware(request: Request, call_next: Callable) -> Response:
+    # Try to extract tenant from header
+    x_tenant_id = request.headers.get('X-Tenant-ID')
+    authorization = request.headers.get('Authorization')
+    
+    if not x_tenant_id and not authorization:
+        raise HTTPException(status_code=401, detail="Missing tenant identification")
+    
+    # Set current tenant in request scope
+    request.state.tenant_id = x_tenant_id or extract_tenant_from_token(authorization)
+    
+    return await call_next(request)
+
+# Add to main.py
+app.add_middleware(TenantMiddleware)
+
+# Or use Depends
+from fastapi import Depends
+
+async def get_current_tenant(
+    x_tenant_id: str | None = Header(None),
+    authorization: str | None = Header(None)
+) -> Tenant:
+    if not x_tenant_id and not authorization:
+        raise HTTPException(status_code=401)
+    
+    tenant_id = x_tenant_id or extract_tenant_from_token(authorization)
+    return await tenant_repository.get_tenant(tenant_id)</code></pre>
+            
+            <h3>Database Filtering</h3>
+            <pre><code><span class="code"># SQLAlchemy with tenant injection
+from sqlalchemy import column, literal, select, and_
+
+class ConversationRepository:
+    async def get_conversations(self, tenant: Tenant, limit: int = 50):
+        # Inject tenant_id into query
+        query = select(Conversation).where(
+            Conversation.tenant_id == tenant.id
+        ).order_by(Conversation.created_at.desc()).limit(limit)
+        
+        return await self.session.execute(query)
+    
+    async def search_with_rag(self, tenant: Tenant, query: str) -> List[VectorEmbeddingResult]:
+        # Get tenant's FAISS index
+        faiss_path = f"{self.faiss_dir}/{tenant.id}.faiss"
+        index = faiss.IndexFlatIP(384)  # 384 dimensions for all-MiniLM
+        
+        # Query tenant-specific index
+        embeddings = embed_query(query)
+        results = index.search(embeddings, k=3)
+        return results</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Rate Limiting per Tenant</h2>
+            <h3>Token Bucket Algorithm</h3>
+            <pre><code><span class="code"># Per-tenant rate limiting with Redis
+from aiolimiter import TokenBucket
+import redis.asyncio as redis
+
+class TenantRateLimiter:
+    def __init__(self, default_quota: int = 1000, default_rate: int = 100):
+        self.redis = redis.Redis(host='localhost', port=6379)
+        self.default_quota = default_quota
+        self.default_rate = default_rate
+    
+    async def get_or_create_bucket(self, tenant_id: str) -> TokenBucket:
+        # Get tenant-specific quota from Redis
+        config = await self.redis.get(f"tenant:{tenant_id}:config")
+        if config:
+            quota, rate = json.loads(config)
+        else:
+            quota, rate = self.default_quota, self.default_rate
+        
+        # Create tenant-specific bucket
+        bucket_key = f"ratelimit:{tenant_id}"
+        bucket = TokenBucket(quota, rate, redis_backend=self.redis)
+        return bucket
+    
+    async def check_rate_limit(self, tenant_id: str) -> bool:
+        bucket = await self.get_or_create_bucket(tenant_id)
+        try:
+            await bucket.acquire()
+            return True
+        except LimitExceeded:
+            return False</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>User Roles and Permissions</h2>
+            <h3>Role-Based Access Control (RBAC)</h3>
+            <table>
+                <tr><th>Role</th><th>Permissions</th><th>Scope</th></tr>
+                <tr><td><strong>Super Admin</strong></td><td>All permissions</td><td>Global</td></tr>
+                <tr><td><strong>Tenant Admin</strong></td><td>Manage tenant, users, tools</td><td>Tenant-specific</td></tr>
+                <tr><td><strong>Agent</strong></td><td>View conversations, manage knowledge</td><td>Tenant-specific</td></tr>
+                <tr><td><strong>Read-only</strong></td><td>View data only</td><td>Tenant-specific</td></tr>
+            </table>
+            
+            <h3>Role Management</h3>
+            <pre><code><span class="code"># Add user to tenant with role
+curl -X POST http://localhost:8000/api/tenants/abc123/users \
+  -H "Authorization: Bearer TENANT_ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "agent@acme.com",
+    "name": "Support Agent",
+    "role": "agent",
+    "permissions": ["view_conversations", "manage_knowledge"]
+  }'</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Multi-Tenant API Design</h2>
+            <h3>API Endpoints</h3>
+            <pre><code><span class="code"># Tenant-specific routes
+@router.get("/tenants/{tenant_id}/conversations")
+async def get_tenant_conversations(
+    tenant_id: str,
+    current_tenant: Tenant = Depends(get_current_tenant)
+):
+    return await conversation_service.get_conversations(current_tenant)
+
+# Super admin routes (no tenant filter)
+@router.get("/admin/tenants")
+async def list_all_tenants(
+    role: str = Depends(require_role("super_admin"))
+):
+    return await tenant_repository.list_all()
+
+# Public endpoints (tenant inferred from auth)
+@router.post("/chat/messages")
+async def chat(
+    messages: List[Message],
+    current_tenant: Tenant = Depends(get_current_tenant)
+):
+    return await chat_service.process(messages, current_tenant)</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Production Considerations</h2>
+            <h3>Scalability Limits</h3>
+            <ul>
+                <li><strong>Memory:</strong> Monitor FAISS index size per tenant</li>
+                <li><strong>Connection Pooling:</strong> Use PgBouncer for PostgreSQL</li>
+                <li><strong>Database Size:</strong> Split large tenants to separate databases</li>
+                <li><strong>Vector Search:</strong> Qdrant with partitioning for >1M vectors</li>
+            </ul>
+            
+            <h3>Tenant Lifecycle</h3>
+            <pre><code><span class="code"># Soft delete tenant (preserve data)
+async def suspend_tenant(tenant_id: str):
+    tenant = await get_tenant(tenant_id)
+    tenant.is_suspended = True
+    tenant.max_messages_per_day = 0
+    
+    # Disable rate limiting
+    await rate_limiter.disable(tenant_id)
+    
+    # Keep data for 90 days then purge
+    await schedule_purge(tenant_id, delay_days=90)
+
+# Hard delete tenant (dangerous!)
+async def delete_tenant(tenant_id: str):
+    # Only for super admin
+    tenant = await get_tenant(tenant_id)
+    
+    # Delete from all tables
+    await database.delete_tenant_data(tenant_id)
+    
+    # Remove FAISS index
+    faiss_path = f"{FAISS_DIR}/{tenant_id}.faiss"
+    if os.path.exists(faiss_path):
+        os.remove(faiss_path)</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>Migration Path</h2>
+            <h3>From SQLite to PostgreSQL</h3>
+            <pre><code><span class="code"># Migration script using Alembic
+def upgrade():
+    # Create new PostgreSQL tables
+    op.create_table('conversations',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('tenant_id', sa.Uuid(), nullable=False),
+        ...
+    )
+    
+    # Copy data from SQLite to PostgreSQL
+    for row in op.get_bind().execute("SELECT * FROM conversations"):
+        op.execute(
+            f"INSERT INTO conversations VALUES ({row.id}, {row.tenant_id}, ...)"
+        )
+    
+    # Switch connection string
+    # DATABASE_URL=postgresql://user:pass@host/db</code></pre>
+        </div>
+    </div>
+</body>
+</html>

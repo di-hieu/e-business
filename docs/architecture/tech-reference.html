@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technology Deep Dive - SC Chatbot</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; margin-bottom: 20px; }
+        header h1 { font-size: 2rem; }
+        a { color: #667eea; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .card { background: white; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { color: #667eea; margin-bottom: 15px; }
+        h3 { color: #764ba2; margin: 25px 0 10px 0; }
+        pre { background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; }
+        code { font-family: 'Courier New', monospace; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-top: 10px; }
+        .badge-poc { background: #e3f2fd; color: #1976d2; }
+        .badge-planned { background: #fff3e0; color: #f57c00; }
+        .back-link { display: inline-block; background: #667eea; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; margin-bottom: 20px; }
+        ul, ol { margin-left: 20px; margin-top: 10px; }
+        li { margin-bottom: 8px; }
+        .tip { background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #9c27b0; }
+        .comparison { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin: 15px 0; }
+        .comparison-card { background: #f8f9fa; padding: 15px; border-radius: 8px; }
+        .comparison-card h4 { color: #333; margin-bottom: 5px; }
+        .comparison-card p { font-size: 0.85rem; color: #555; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🛠️ Technology Deep Dive</h1>
+    </header>
+    <div class="container">
+        <a href="../table-of-contents.html" class="back-link">← Back to Documentation</a>
+        
+        <div class="card">
+            <h2>Introduction</h2>
+            <p>This document provides comprehensive explanations of every technology and tool used in the SC Chatbot project. Each section explains what the technology is, why it was chosen, how it works, and when to use it.</p>
+            <span class="badge badge-poc">POC Ready</span>
+        </div>
+
+        <div class="card">
+            <h2>Backend Technologies</h2>
+            
+            <h3>FastAPI</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Modern, fast (high-performance) web framework for building APIs with Python 3.10+ based on standard Python type hints.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li><strong>Automatic documentation:</strong> Interactive Swagger UI and ReDoc endpoints generated from type hints</li>
+                    <li><strong>Async support:</strong> Native async/await for high-concurrency I/O operations</li>
+                    <li><strong>Fast:</strong> Uses Pydantic v2 for data validation with high performance</li>
+                    <li><strong>Type safety:</strong> Full type hints for better IDE support and fewer bugs</li>
+                    <li><strong>Development speed:</strong> Built-in dev server with hot reload</li>
+                </ul>
+            </div>
+            <div class="comparison-card">
+                <h4>How it works?</h4>
+                <pre><code><span class="code"># Basic FastAPI setup
+from fastapi import FastAPI, Request, HTTPException
+from pydantic import BaseModel
+from typing import Optional
+
+# Create app
+app = FastAPI(
+    title="SC Chatbot API",
+    description="AI-powered customer support chatbot",
+    version="0.1.0"
+)
+
+# Request model
+class ChatRequest(BaseModel):
+    message: str
+    channel: str
+    order_id: Optional[str] = None
+
+# API endpoint
+@app.post("/chat/messages")
+async def chat(request: ChatRequest):
+    # Process the chat message
+    return {"response": "Hello!"}</code></pre>
+            </div>
+            <div class="comparison-card">
+                <h4>Key Features</h4>
+                <ul>
+                    <li><strong>Dependencies:</strong> Automatic dependency injection for database connections, cache, etc.</li>
+                    <li><strong>Middleware:</strong> Built-in middleware support for logging, CORS, rate limiting</li>
+                    <li><strong>Response models:</strong> Define output schemas for consistent API responses</li>
+                    <li><strong>Background tasks:</strong> Run async tasks after request completes</li>
+                </ul>
+            </div>
+            
+            <h3>SQLAlchemy</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Python SQL toolkit and ORM that supports asynchronous operations (aiosqlite).</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li><strong>Database abstraction:</strong> Write portable database code</li>
+                    <li><strong>Async support:</strong> Works with aiosqlite for concurrent requests</li>
+                    <li><strong>Migrations:</strong> Integrates with Alembic for schema versioning</li>
+                    <li><strong>Type hints:</strong> Full type hints from models</li>
+                </ul>
+            </div>
+            <div class="comparison-card">
+                <h4>How it works?</h4>
+                <pre><code><span class="code"># SQLAlchemy models
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy.orm import relationship, declarative_base
+from aiosqlite import Connection
+
+Base = declarative_base()
+
+class Tenant(Base):
+    __tablename__ = "tenants"
+    
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), unique=True)
+    api_key = Column(String(255), unique=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    conversations = relationship("Conversation", back_populates="tenant")
+
+# Async database session
+async def get_db():
+    async with Connection("sqlite:///chatbot.db") as db:
+        try:
+            yield db
+        finally:
+            await db.close()</code></pre>
+            </div>
+
+            <h3>Pydantic</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Data validation using Python type hints. Used for request/response models.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li><strong>Automatic validation:</strong> Validates all incoming data</li>
+                    <li><strong>Type safety:</strong> Catch errors at development time</li>
+                    <li><strong>Serialization:</strong> Convert objects to dictionaries</li>
+                    <li><strong>Integrates with FastAPI:</strong> Automatic docs from models</li>
+                </ul>
+            </div>
+            <div class="comparison-card">
+                <h4>How it works?</h4>
+                <pre><code><span class="code"># Pydantic models
+from pydantic import BaseModel, Field, EmailStr, validator
+from typing import Optional, List
+
+class ChatMessage(BaseModel):
+    """Chat message model with validation."""
+    message: str = Field(..., min_length=1, max_length=10000)
+    channel: str = Field(..., pattern=r"^(web|zalo|facebook|instagram)$")
+    order_id: Optional[str] = Field(None, max_length=50)
+    
+    # Custom validation
+    @validator('message')
+    def sanitize_message(cls, v):
+        dangerous_patterns = ['</script>', '<script>']
+        for pattern in dangerous_patterns:
+            v = v.replace(pattern, '')
+        return v
+
+# Validation happens automatically on request</code></pre>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>AI & LLM Technologies</h2>
+            
+            <h3>LangChain</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Framework for developing applications powered by language models. Provides chains, agents, and memory components.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li><strong>Standard:</strong> Industry standard for RAG implementations</li>
+                    <li><strong>Composable:</strong> Build applications from modular components</li>
+                    <li><strong>Memory:</strong> Built-in conversation memory management</li>
+                    <li><strong>Tool calling:</strong> Framework for function calling</li>
+                </ul>
+            </div>
+            <div class="comparison-card">
+                <h4>How it works?</h4>
+                <pre><code><span class="code"># RAG pipeline with LangChain
+from langchain.embeddings import CacheEmbeddings
+from langchain.vectorstores import FAISS
+from langchain.chains import RetrievalQA
+from langchain.chat_models import ChatOpenAI
+
+# Initialize components
+embedder = CacheEmbeddings(model="all-MiniLM-L6-v2", cache_folder=".cache")
+vectorstore = FAISS.from_documents(documents, embedder)
+
+# Create chain with chat model
+llm = ChatOpenAI(model="gpt-4o-mini")
+qa_chain = RetrievalQA.from_chain_type(
+    llm=llm,
+    retriever=vectorstore.as_retriever()
+)
+
+# Query
+result = qa_chain("What is the return policy?")</code></pre>
+            </div>
+            
+            <h3>LangGraph</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Extend LangChain with graphs. Cyclic behavior, stateful apps. Essential for conversation memory and agent workflows.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li><strong>Multi-turn:</strong> Handle complex, multi-turn conversations</li>
+                    <li><strong>State management:</strong> Track conversation state</li>
+                    <li><strong>Agent loops:</strong> Allow LLM to decide when to call tools</li>
+                    <li><strong>Human handoff:</strong> Route to human agents</li>
+                </ul>
+            </div>
+            <div class="comparison-card">
+                <h4>How it works?</h4>
+                <pre><code><span class="code"># LangGraph agent
+from langgraph.graph import StateGraph, END
+from typing import TypedDict, List
+
+class AgentState(TypedDict):
+    messages: List[dict]
+    conversation_id: str
+
+# Define nodes
+def call_model(state: AgentState):
+    """Call LLM model."""
+    pass
+
+def call_tool(state: AgentState):
+    """Call external tool."""
+    pass
+
+# Build graph
+workflow = StateGraph(AgentState)
+workflow.add_node("model", call_model)
+workflow.add_node("tool", call_tool)
+workflow.set_entry_point("model")
+
+# Compile
+app = workflow.compile()</code></pre>
+            </div>
+            
+            <h3>LiteLLM</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Unified interface to call all LLMs. Standardize on one interface (like OpenAI) while supporting OpenAI, Anthropic, Cohere, Ollama, and hundreds more models.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li><strong>Vendor neutral:</strong> Swap LLMs without code changes</li>
+                    <li><strong>Cost comparison:</strong> Compare pricing across providers</li>
+                    <li><strong>Multi-model:</strong> Test different models side by side</li>
+                    <li><strong>OpenRouter support:</strong> One call to access 100+ models</li>
+                </ul>
+            </div>
+            <div class="comparison-card">
+                <h4>How it works?</h4>
+                <pre><code><span class="code"># LiteLLM usage
+import litellm
+import os
+
+# Set providers
+os.environ["LITELLM_MODE"] = "pass_through"
+
+# Call OpenAI
+response = litellm.completion(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello"}]
+)
+
+# Call Anthropic via LiteLLM
+response = litellm.completion(
+    model="claude-3-sonnet-20240229",
+    messages=[{"role": "user", "content": "Hello"}]
+)
+
+# Call local Ollama
+response = litellm.completion(
+    model="ollama/llama3",
+    messages=[{"role": "user", "content": "Hello"}]
+)</code></pre>
+            </div>
+
+            <h3>Embedding Models</h3>
+            <div class="comparison-card">
+                <h4>all-MiniLM-L6-v2</h4>
+                <p><strong>When to use:</strong> POC phase, runs locally, ~50MB size, good quality for general purposes, free.</p>
+                <p><strong>Why use it:</strong> Lightweight, no API costs, works offline.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>OpenAI text-embedding-3-small</h4>
+                <p><strong>When to use:</strong> Production, higher quality, faster inference on cloud.</p>
+                <p><strong>Why use it:</strong> Better embeddings, cheaper at scale.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>BGE (BAAI)</h4>
+                <p><strong>When to use:</strong> Multi-language scenarios, especially Chinese.</p>
+                <p><strong>Why use it:</strong> Excellent quality for Chinese and other languages.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Vector Database Technologies</h2>
+            
+            <h3>FAISS (Facebook AI Similarity Search)</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>File-based library for efficient similarity search and clustering of dense vectors. No external service needed.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Pros</h4>
+                <ul>
+                    <li>Zero setup, embedded in Python</li>
+                    <li>Fast for small datasets (<100k vectors)</li>
+                    <li>No network dependency</li>
+                    <li>Free and open source</li>
+                </ul>
+            </div>
+            <div class="comparison-card">
+                <h4>Cons</h4>
+                <ul>
+                    <li>Single-tenant by default</li>
+                    <li>File-based (not cloud-native)</li>
+                    <li>No concurrent access control</li>
+                    <li>Manual backup/restore</li>
+                </ul>
+            </div>
+            <div class="comparison-card">
+                <h4>How it works?</h4>
+                <pre><code><span class="code"># FAISS setup
+import faiss
+from sentence_transformers import SentenceTransformer
+
+# Load embedding model
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+# Create FAISS index
+embedding_dim = 384
+index = faiss.IndexFlatIP(embedding_dim)  # Inner product for cosine similarity
+
+# Add documents (as vectors)
+vectors = model.encode(documents)
+index.add(vectors)
+
+# Search
+query_vector = model.encode("What is the return policy?")
+distances, indices = index.search(query_vector, k=5)</code></pre>
+            </div>
+            
+            <h3>Qdrant</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Cloud-native vector similarity engine optimized for low latency and high throughput. Supports filtering, metadata storage, and clustering.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Pros</h4>
+                <ul>
+                    <li>Multi-tenant support</li>
+                    <li>Advanced filtering (metadata)</li>
+                    <li>Cloud and self-hosted options</li>
+                    <li>High concurrency</li>
+                </ul>
+            </div>
+            <div class="comparison-card">
+                <h4>Cons</h4>
+                <ul>
+                    <li>Requires separate service</li>
+                    <li>More complex setup</li>
+                    <li>External dependency</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Database Technologies</h2>
+            
+            <h3>SQLite vs PostgreSQL</h3>
+            <div class="comparison-card">
+                <h4>SQLite (POC)</h4>
+                <p><strong>When to use:</strong> Development, testing, on-prem, <10k concurrent users</p>
+                <p><strong>Pros:</strong> Single file, no server, zero config, ideal for testing</p>
+                <p><strong>Cons:</strong> No concurrent writes, limited scaling, no advanced features</p>
+            </div>
+            <div class="comparison-card">
+                <h4>PostgreSQL (Production)</h4>
+                <p><strong>When to use:</strong> Production, multi-tenant, >10k concurrent users</p>
+                <p><strong>Pros:</strong> Full-featured, concurrent connections, JSONB, row-level security</p>
+                <p><strong>Cons:</strong> Requires server, cloud costs, more complex setup</p>
+            </div>
+
+            <h3>aiosqlite</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Async wrapper for SQLite, enabling concurrent database access in FastAPI.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <p>Without async, SQLite blocks during queries. aiosqlite enables true async operation.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Caching & Performance</h2>
+            
+            <h3>functools.lru_cache</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Built-in Python decorator for automatic caching of function results.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>Zero dependencies</li>
+                    <li>Automatic LRU eviction</li>
+                    <li>Simple and fast</li>
+                </ul>
+            </div>
+            <div class="comparison-card">
+                <h4>How it works?</h4>
+                <pre><code><span class="code"># Function caching
+from functools import lru_cache
+
+@lru_cache(maxsize=1000)
+def get_cached_embedding(text: str):
+    """Cache embeddings for repeated queries."""
+    # Compute embedding
+    return model.encode(text)
+
+# Automatic caching on calls</code></pre>
+            </div>
+            
+            <h3>TTL Dict (In-memory)</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Simple key-value store with time-to-live expiration.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>Good for session data</li>
+                    <li>Automatic cleanup</li>
+                    <li>Memory-efficient</li>
+                </ul>
+            </div>
+            
+            <h3>Redis (Production)</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>In-memory data structure store. Caching, session storage, message queues.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>Distributed cache</li>
+                    <li>Persistence options</li>
+                    <li>Pub/sub for event-driven architecture</li>
+                    <li>Sub-millisecond access</li>
+                </ul>
+            </div>
+            <div class="comparison-card">
+                <h4>How it works?</h4>
+                <pre><code><span class="code"># Redis caching
+import redis.asyncio as redis
+
+redis_client = redis.Redis.from_url("redis://localhost:6379")
+
+# Set with TTL
+await redis_client.set("cache:key", value, ex=3600)
+
+# Get or cache
+cached = await redis_client.get("cache:key")
+if not cached:
+    result = await fetch_from_llm()
+    await redis_client.set("cache:key", result, ex=3600)</code></pre>
+            </div>
+            
+            <h3>Rate Limiting (aiolimiter)</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Token-bucket based rate limiter for async operations in Python.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>Prevents API abuse</li>
+                    <li>Manages LLM token usage</li>
+                    <li>Protects against burst traffic</li>
+                    <li>Smooth traffic shaping</li>
+                </ul>
+            </div>
+            <div class="comparison-card">
+                <h4>How it works?</h4>
+                <pre><code><span class="code"># Token bucket rate limiter
+from aiolimiter import AsyncTokenBucket
+
+# Create limiter
+rate_limiter = AsyncTokenBucket(100, 1)  # 100 requests/min, 1 burst
+
+# Use in async function
+async def rate_limited_chat(message: dict):
+    async with rate_limiter:
+        return await call_llm(message)</code></pre>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Async Task Processing</h2>
+            
+            <h3>FastAPI BackgroundTasks</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Built-in mechanism to run async functions after request completes.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>Simple for basic tasks</li>
+                    <li>No extra dependencies</li>
+                    <li>Good for webhooks and file uploads</li>
+                </ul>
+            </div>
+            <div class="comparison-card">
+                <h4>Limitations</h4>
+                <ul>
+                    <li>Runs in worker process</li>
+                    <li>Tasks die if app restarts</li>
+                    <li>No persistence</li>
+                    <li>Not for long-running jobs</li>
+                </ul>
+            </div>
+            
+            <h3>Celery</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Distributed task queue based on Python, message passing, and worker processes.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>Long-running crawls</li>
+                    <li>Persistent tasks across restarts</li>
+                    <li>Worker scaling</li>
+                    <li>Production-grade</li>
+                </ul>
+            </div>
+            <div class="comparison-card">
+                <h4>How it works?</h4>
+                <pre><code><span class="code"># Celery task
+from celery import Celery
+
+app = Celery(
+    "sc_chatbot",
+    broker="redis://localhost:6379/0",
+    backend="redis://localhost:6379/1"
+)
+
+@app.task
+def crawl_website(url: str):
+    """Crawl a website for knowledge."""
+    # Implement crawling
+    pass</code></pre>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Frontend Technologies</h2>
+            
+            <h3>React</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>JavaScript library for building user interfaces. Virtual DOM, component-based, and declarative.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>Industry standard</li>
+                    <li>Large ecosystem</li>
+                    <li>Component reusability</li>
+                    <li>Excellent tooling</li>
+                </ul>
+            </div>
+            
+            <h3>Vite</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Next-generation frontend tooling. Provides instant server start, HMR, and optimized builds.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>Fast dev server</li>
+                    <li>Instant HMR</li>
+                    <li>Tree-shaking</li>
+                    <li>TypeScript first</li>
+                </ul>
+            </div>
+            
+            <h3>Bootstrap 5 (POC)</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Popular CSS framework for faster prototyping.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>Familiar components</li>
+                    <li>Responsive grid</li>
+                    <li>No build required</li>
+                    <li>Good for POC</li>
+                </ul>
+            </div>
+            <div class="comparison-card">
+                <h4>Upgrade Path</h4>
+                <p>Migrate to Tailwind + shadcn/ui or Ant Design for production.</p>
+            </div>
+
+            <h3>React Context (POC)</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Built-in React feature for global state management.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>No additional dependencies</li>
+                    <li>Simple for dashboard</li>
+                    <li>Properly scoped</li>
+                </ul>
+            </div>
+            <div class="comparison-card">
+                <h4>Limitations</h4>
+                <p>Not optimized for frequent updates, can cause re-renders.</p>
+            </div>
+            
+            <h3>Zustand (Production)</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Minimalistic state management with subscription-based API.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>No context hell</li>
+                    <li>Subscription-based</li>
+                    <li>Type-safe</li>
+                    <li>Small bundle size</li>
+                </ul>
+            </div>
+
+            <h3>Redux Toolkit (Production Alternative)</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Enterprise-grade state management with time-travel debugging and middleware ecosystem.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>Standard for complex apps</li>
+                    <li>DevTools</li>
+                    <li>Middleware support</li>
+                    <li>Predictable state</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Deployment Technologies</h2>
+            
+            <h3>Docker</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Containerization platform for packaging applications with all dependencies.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>Consistent environments</li>
+                    <li>One-command deployment</li>
+                    <li>Isolated dependencies</li>
+                    <li>Development parity</li>
+                </ul>
+            </div>
+            
+            <h3>Docker Compose</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Tool for defining and running multi-container applications with single-file config.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>Simple startup</li>
+                    <li>Define all services</li>
+                    <li>Volume persistence</li>
+                    <li>Network isolation</li>
+                </ul>
+            </div>
+            
+            <h3>fpm (Packaging)</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Ruby tool for building .deb and .rpm packages from arbitrary source trees.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>On-prem deployment</li>
+                    <li>Standard Debian/RPM format</li>
+                    <li>Easy to use</li>
+                </ul>
+            </div>
+            <div class="comparison-card">
+                <h4>How it works?</h4>
+                <pre><code><span class="code"># Create .deb package
+fpm -s dir -t deb -n "sc-chatbot" \
+    -v 0.1.0 \
+    --description "SC Chatbot for SMEs" \
+    --vendor "Your Company" \
+    --license "MIT" \
+    --maintainer "dev@example.com" \
+    --config-files "*.yml,*.yaml,*.env" \
+    src/backend dist/sc-chatbot_0.1.0_amd64.deb</code></pre>
+            </div>
+            
+            <h3>systemd</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>System and service manager for Linux. Define services that start on boot.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>On-prem deployment</li>
+                    <li>Process management</li>
+                    <li>Log management</li>
+                    <li>Automatic restart</li>
+                </ul>
+            </div>
+            <div class="comparison-card">
+                <h4>Unit file example</h4>
+                <pre><code><span class="code"># /etc/systemd/system/sc-chatbot.service
+[Unit]
+Description=SC Chatbot Backend Service
+After=network.target
+
+[Service]
+Type=simple
+User=sc-chatbot
+ExecStart=/home/sc-chatbot/venv/bin/python \
+    /home/sc-chatbot/src/backend/main.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Observability Technologies</h2>
+            
+            <h3>Prometheus</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Open-source monitoring and alerting toolkit for time-series data.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>Industry standard</li>
+                    <li>Powerful PromQL queries</li>
+                    <li>Integrates with Grafana</li>
+                    <li>Pull-based metrics</li>
+                </ul>
+            </div>
+            
+            <h3>Grafana</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Visualization platform for metrics data with dashboards.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>Beautiful dashboards</li>
+                    <li>Alerting on thresholds</li>
+                    <li>Data source abstraction</li>
+                    <li>Sharing capabilities</li>
+                </ul>
+            </div>
+            
+            <h3>OpenTelemetry</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Observability standard for collecting telemetry data (traces, metrics, logs).</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>Vendor-neutral format</li>
+                    <li>Distributed tracing</li>
+                    <li>Unified across services</li>
+                    <li>Integrates with Prometheus</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Security Technologies</h2>
+            
+            <h3>JWT (JSON Web Tokens)</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Compact, URL-safe means of representing claims to be transferred between two parties.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>Stateless authentication</li>
+                    <li>Standard format</li>
+                    <li>Widely supported</li>
+                    <li>Secure when configured properly</li>
+                </ul>
+            </div>
+            
+            <h3>HMAC Signature Verification</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Message Authentication Code using cryptographic hash functions.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>Verify webhook authenticity</li>
+                    <li>Prevent replay attacks</li>
+                    <li>Constant-time comparison</li>
+                </ul>
+            </div>
+            
+            <h3>Rate Limiting</h3>
+            <div class="comparison-card">
+                <h4>Token Bucket Algorithm</h4>
+                <p>Rate limiting strategy where requests consume tokens from a bucket that refills over time.</p>
+                <ul>
+                    <li>Smooths traffic bursts</li>
+                    <li>Fair resource allocation</li>
+                    <li>Configurable limits</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Development Tools</h2>
+            
+            <h3>pytest</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Full-featured Python testing framework with async support.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>Python standard</li>
+                    <li>Async support (pytest-asyncio)</li>
+                    <li>Fixtures and mocks</li>
+                    <li>Coverage integration</li>
+                </ul>
+            </div>
+            
+            <h3>black</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Unopinionated Python code formatter.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>Consistent code style</li>
+                    <li>Zero config</li>
+                    <li>Fast</li>
+                    <li>Industry standard</li>
+                </ul>
+            </div>
+            
+            <h3>flake8</h3>
+            <div class="comparison-card">
+                <h4>What is it?</h4>
+                <p>Python linter that checks PEP 8 compliance and common errors.</p>
+            </div>
+            <div class="comparison-card">
+                <h4>Why use it?</h4>
+                <ul>
+                    <li>Catch bugs early</li>
+                    <li>Enforce style</li>
+                    <li>Fast</li>
+                    <li>Extensible</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Comparison Summary</h2>
+            <table>
+                <tr>
+                    <th>Category</th>
+                    <th>POC Technology</th>
+                    <th>Production Upgrade</th>
+                </tr>
+                <tr>
+                    <td>Backend Framework</td>
+                    <td>FastAPI</td>
+                    <td>Same (add gunicorn/uvicorn workers)</td>
+                </tr>
+                <tr>
+                    <td>LLM Orchestration</td>
+                    <td>LangChain + LangGraph</td>
+                    <td>Same (optimize, add streaming)</td>
+                </tr>
+                <tr>
+                    <td>LLM Gateway</td>
+                    <td>LiteLLM</td>
+                    <td>Same (add caching, fallbacks)</td>
+                </tr>
+                <tr>
+                    <td>Vector Database</td>
+                    <td>FAISS</td>
+                    <td>Qdrant (managed service)</td>
+                </tr>
+                <tr>
+                    <td>Conversation DB</td>
+                    <td>SQLite + aiosqlite</td>
+                    <td>PostgreSQL (AWS RDS)</td>
+                </tr>
+                <tr>
+                    <td>Caching</td>
+                    <td>lru_cache + TTL dict</td>
+                    <td>Redis</td>
+                </tr>
+                <tr>
+                    <td>Async Tasks</td>
+                    <td>FastAPI BackgroundTasks</td>
+                    <td>Celery + Redis</td>
+                </tr>
+                <tr>
+                    <td>Rate Limiting</td>
+                    <td>aiolimiter</td>
+                    <td>Redis-backed limiter</td>
+                </tr>
+                <tr>
+                    <td>UI Framework</td>
+                    <td>Bootstrap 5</td>
+                    <td>Tailwind + shadcn/ui</td>
+                </tr>
+                <tr>
+                    <td>Monitoring</td>
+                    <td>Structured logs</td>
+                    <td>Prometheus + Grafana</td>
+                </tr>
+                <tr>
+                    <td>Packaging</td>
+                    <td>Docker only</td>
+                    <td>fpm for .deb/.rpm</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Next Steps</h2>
+            <ul>
+                <li><a href="../team/onboarding.html">Review team onboarding guide</a></li>
+                <li><a href="../deployment/docker.html">Read Docker deployment guide</a></li>
+                <li><a href="../guides/getting-started.html">Start building with getting started guide</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
