@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SC Chatbot - E2E Testing Guide</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; margin-bottom: 30px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        header h1 { font-size: 2.8rem; margin-bottom: 10px; }
+        header p { font-size: 1.2rem; opacity: 0.95; }
+        .back-link { display: inline-block; background: white; color: #667eea; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-bottom: 30px; transition: transform 0.2s; }
+        .back-link:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .summary { background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .summary h2 { color: #667eea; margin-bottom: 15px; font-size: 1.8rem; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }
+        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; }
+        .stat-card h3 { font-size: 2.5rem; margin-bottom: 5px; }
+        .stat-card p { font-size: 0.9rem; opacity: 0.9; }
+        .phase { background: white; border-radius: 12px; padding: 30px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-left: 6px solid #667eea; }
+        .phase h2 { color: #667eea; margin-bottom: 20px; font-size: 1.6rem; display: flex; align-items: center; gap: 10px; }
+        .phase-meta { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+        .meta-item { background: #f8f9fa; padding: 8px 15px; border-radius: 6px; font-size: 0.9rem; }
+        .epic { margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #764ba2; }
+        .epic h3 { color: #764ba2; margin-bottom: 15px; font-size: 1.2rem; }
+        .epic ul { margin-left: 20px; }
+        .epic li { margin-bottom: 10px; position: relative; padding-left: 10px; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-left: 10px; }
+        .badge-e2e { background: #e8f5e9; color: #388e3c; }
+        .badge-integration { background: #fff3e0; color: #f57c00; }
+        .badge-unit { background: #e3f2fd; color: #1976d2; }
+        .code-block { background: #2d2d2d; color: #f8f8f2; padding: 20px; border-radius: 8px; overflow-x: auto; margin: 15px 0; }
+        .code-block pre { margin: 0; font-family: 'Monaco', 'Menlo', monospace; font-size: 0.9rem; }
+        .table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+        th { background: #667eea; color: white; font-weight: 600; }
+        tr:hover { background: #f8f9fa; }
+        .timeline { margin-bottom: 40px; }
+        .milestone { background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%); color: white; padding: 20px; border-radius: 10px; margin: 20px 0; }
+        .milestone h3 { font-size: 1.3rem; margin-bottom: 10px; }
+        .risk-section { background: #ffebee; padding: 20px; border-radius: 8px; margin-top: 20px; border-left: 4px solid #d32f2f; }
+        .risk-section h4 { color: #d32f2f; margin-bottom: 10px; }
+        footer { text-align: center; padding: 30px 20px; color: #666; font-size: 0.9rem; background: white; border-radius: 12px; margin-top: 30px; }
+        .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
+        .tech-card { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 20px; border-radius: 10px; }
+        .tech-card h4 { color: #333; margin-bottom: 10px; }
+        .tech-card p { font-size: 0.9rem; color: #555; }
+        .tech-card .tech-name { font-weight: 600; color: #667eea; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🧪 E2E Testing Guide</h1>
+        <p>Complete Testing Strategy for SC Chatbot Platform</p>
+    </header>
+    <div class="container">
+        <a href="table-of-contents.html" class="back-link">← Back to Documentation</a>
+        
+        <div class="summary">
+            <h2>📊 Testing Overview</h2>
+            <p><strong>Purpose:</strong> Comprehensive E2E testing strategy to ensure reliability, security, and performance of the SC Chatbot platform across all three development phases.</p>
+            <p style="margin-top: 10px;"><strong>Key Focus Areas:</strong> Channel integrations, RAG functionality, tool calling, multi-tenancy isolation, admin dashboard, and load testing for production readiness.</p>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>5</h3>
+                    <p>Testing Phases</p>
+                </div>
+                <div class="stat-card">
+                    <h3>200+</h3>
+                    <p>Test Cases</p>
+                </div>
+                <div class="stat-card">
+                    <h3>99%</h3>
+                    <p>Code Coverage Target</p>
+                </div>
+                <div class="stat-card">
+                    <h3>3</h3>
+                    <p>Development Phases</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h2>🎯 Testing Phases Overview</h2>
+            <p>Detailed breakdown of E2E testing for each development phase</p>
+        </div>
+
+        <div class="timeline">
+            <div class="phase">
+                <h2>📋 Phase 1: POC Testing <span class="badge badge-e2e">E2E</span></h2>
+                <div class="phase-meta">
+                    <div class="meta-item"><strong>Duration:</strong> Month 1-3</div>
+                    <div class="meta-item"><strong>Goal:</strong> Validate core functionality</div>
+                    <div class="meta-item"><strong>Test Type:</strong> Functional + Unit</div>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 1.1: Channel Integration Tests <span class="badge badge-e2e">E2E</span></h3>
+                    <ul>
+                        <li><strong>Zalo Integration Tests:</strong>
+                            <ul>
+                                <li>Webhook signature verification (HMAC-SHA256)</li>
+                                <li>Message parsing (text, image, audio)</li>
+                                <li>Template message support</li>
+                                <li>Rate limiting (60 msg/min per OA)</li>
+                                <li>Error handling for invalid payloads</li>
+                            </ul>
+                        </li>
+                        <li><strong>Facebook Messenger Tests:</strong>
+                            <ul>
+                                <li>Webhook verification (X-Hub-Signature)</li>
+                                <li>Quick reply handling</li>
+                                <li>Template message generation</li>
+                                <li>Persistent menu configuration</li>
+                                <li>File attachment support</li>
+                            </ul>
+                        </li>
+                        <li><strong>Instagram Direct Tests:</strong>
+                            <ul>
+                                <li>Graph API webhook handling</li>
+                                <li>Story reply support</li>
+                                <li>Product tag messages</li>
+                                <li>Carousel media handling</li>
+                                <li>User verification flow</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 1.2: RAG Pipeline Tests <span class="badge badge-integration">Integration</span></h3>
+                    <ul>
+                        <li><strong>Embedding Generation Tests:</strong>
+                            <ul>
+                                <li>all-MiniLM-L6-v2 quality verification</li>
+                                <li>384-dimensional vector output</li>
+                                <li>Batch embedding generation</li>
+                            </ul>
+                        </li>
+                        <li><strong>Vector Search Tests:</strong>
+                            <ul>
+                                <li>FAISS similarity search accuracy</li>
+                                <li>K-nearest neighbor retrieval</li>
+                                <li>Metadata filtering support</li>
+                            </ul>
+                        </li>
+                        <li><strong>Context Injection Tests:</strong>
+                            <ul>
+                                <li>Prompt formatting with retrieved docs</li>
+                                <li>Truncation for long contexts</li>
+                                <li>Source attribution in responses</li>
+                            </ul>
+                        </li>
+                        <li><strong>Response Generation Tests:</strong>
+                            <ul>
+                                <li>GPT-4o-mini response quality</li>
+                                <li>Streaming response support</li>
+                                <li>Fallback to general responses</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 1.3: Tool Calling Tests <span class="badge badge-integration">Integration</span></h3>
+                    <ul>
+                        <li><strong>Tool Definition Tests:</strong>
+                            <ul>
+                                <li>JSON Schema validation</li>
+                                <li>Endpoint availability checks</li>
+                                <li>Method (GET/POST/PUT) validation</li>
+                            </ul>
+                        </li>
+                        <li><strong>Parameter Extraction Tests:</strong>
+                            <ul>
+                                <li>LLM asks for missing parameters</li>
+                                <li>Multi-turn parameter collection</li>
+                                <li>User-friendly prompts</li>
+                            </ul>
+                        </li>
+                        <li><strong>Error Handling Tests:</strong>
+                            <ul>
+                                <li>Unknown tool handling</li>
+                                <li>Invalid parameter validation</li>
+                                <li>Rate limiting enforcement</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 1.4: Basic Admin Dashboard Tests <span class="badge badge-e2e">E2E</span></h3>
+                    <ul>
+                        <li><strong>Login/Logout Tests:</strong>
+                            <ul>
+                                <li>JWT authentication</li>
+                                <li>Password reset flow</li>
+                                <li>Session timeout handling</li>
+                            </ul>
+                        </li>
+                        <li><strong>Knowledge Upload Tests:</strong>
+                            <ul>
+                                <li>PDF file upload</li>
+                                <li>Text content paste</li>
+                                <li>CSV upload</li>
+                                <li>Validation of file types</li>
+                            </ul>
+                        </li>
+                        <li><strong>Tool Management Tests:</strong>
+                            <ul>
+                                <li>Tool definition creation</li>
+                                <li>Schema editing</li>
+                                <li>Test button functionality</li>
+                            </ul>
+                        </li>
+                        <li><strong>Conversation Viewer Tests:</strong>
+                            <ul>
+                                <li>Real-time message streaming</li>
+                                <li>Conversation search</li>
+                                <li>Export to CSV/JSON</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="milestone">
+                    <h3>🎉 Phase 1 Success Criteria</h3>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>✅ Zalo webhook integration working</li>
+                        <li>✅ RAG responses are accurate (≥80% precision)</li>
+                        <li>✅ Tool calling functions correctly</li>
+                        <li>✅ Admin dashboard allows basic operations</li>
+                        <li>✅ Docker Compose setup works end-to-end</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="phase">
+                <h2>📋 Phase 2: MVP Testing <span class="badge badge-e2e">E2E</span></h2>
+                <div class="phase-meta">
+                    <div class="meta-item"><strong>Duration:</strong> Month 4-9</div>
+                    <div class="meta-item"><strong>Goal:</strong> Production-ready multi-tenant platform</div>
+                    <div class="meta-item"><strong>Test Type:</strong> Integration + E2E</div>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 2.1: Multi-Tenancy Tests <span class="badge badge-e2e">E2E</span></h3>
+                    <ul>
+                        <li><strong>Tenant Isolation Tests:</strong>
+                            <ul>
+                                <li>DB query with tenant_id filter</li>
+                                <li>Knowledge base separation</li>
+                                <li>Tool definitions per tenant</li>
+                                <li>API key enforcement</li>
+                            </ul>
+                        </li>
+                        <li><strong>Rate Limiting Tests:</strong>
+                            <ul>
+                                <li>Tenant-level limits</li>
+                                <li>LLM API quota tracking</li>
+                                <li>Concurrent request limiting</li>
+                            </ul>
+                        </li>
+                        <li><strong>Quota Management Tests:</strong>
+                            <ul>
+                                <li>Token usage tracking</li>
+                                <li>Message count limits</li>
+                                <li>Auto-suspend for overages</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 2.2: Advanced Admin Tests <span class="badge badge-e2e">E2E</span></h3>
+                    <ul>
+                        <li><strong>Advanced Analytics Tests:</strong>
+                            <ul>
+                                <li>Response time charts</li>
+                                <li>Error rate dashboards</li>
+                                <li>Tenant usage graphs</li>
+                            </ul>
+                        </li>
+                        <li><strong>User Management Tests:</strong>
+                            <ul>
+                                <li>User role assignment</li>
+                                <li>Permission checks</li>
+                                <li>Team member invites</li>
+                            </ul>
+                        </li>
+                        <li><strong>Settings Management Tests:</strong>
+                            <ul>
+                                <li>LLM model selection</li>
+                                <li>Response style configuration</li>
+                                <li>Language preferences</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 2.3: Production Infrastructure Tests <span class="badge badge-integration">Integration</span></h3>
+                    <ul>
+                        <li><strong>PostgreSQL Migration Tests:</strong>
+                            <ul>
+                                <li>Data migration from SQLite</li>
+                                <li>Connection pooling</li>
+                                <li>Row-level security checks</li>
+                            </ul>
+                        </li>
+                        <li><strong>Redis Caching Tests:</strong>
+                            <ul>
+                                <li>Session storage</li>
+                                <li>Rate limit buckets</li>
+                                <li>Cache invalidation</li>
+                            </ul>
+                        </li>
+                        <li><strong>Celery Task Tests:</strong>
+                            <ul>
+                                <li>Webhook processing</li>
+                                <li>Background job queue</li>
+                                <li>Task persistence</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="milestone">
+                    <h3>🎉 Phase 2 Success Criteria</h3>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>✅ Multi-tenant isolation verified</li>
+                        <li>✅ Facebook integration working</li>
+                        <li>✅ Admin dashboard complete</li>
+                        <li>✅ PostgreSQL + Redis operational</li>
+                        <li>✅ CI/CD pipeline automated</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="phase">
+                <h2>📋 Phase 3: Production Scale Testing <span class="badge badge-e2e">E2E</span></h2>
+                <div class="phase-meta">
+                    <div class="meta-item"><strong>Duration:</strong> Month 10-21</div>
+                    <div class="meta-item"><strong>Goal:</strong> Enterprise-grade platform</div>
+                    <div class="meta-item"><strong>Test Type:</strong> Full suite + Performance</div>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 3.1: Full Integration Tests <span class="badge badge-e2e">E2E</span></h3>
+                    <ul>
+                        <li><strong>Instagram Integration Tests:</strong>
+                            <ul>
+                                <li>Graph API setup</li>
+                                <li>Story reply handling</li>
+                                <li>Product catalog integration</li>
+                            </ul>
+                        </li>
+                        <li><strong>Billing Integration Tests:</strong>
+                            <ul>
+                                <li>Stripe payment processing</li>
+                                <li>Usage-based billing</li>
+                                <li>Invoicing and receipts</li>
+                            </ul>
+                        </li>
+                        <li><strong>Enterprise Feature Tests:</strong>
+                            <ul>
+                                <li>SSO (SAML/OAuth) setup</li>
+                                <li>Audit logging verification</li>
+                                <li>GDPR compliance checks</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 3.2: Load and Performance Tests <span class="badge badge-unit">Unit</span></h3>
+                    <ul>
+                        <li><strong>Concurrent User Tests:</strong>
+                            <ul>
+                                <li>1000 concurrent WebSocket connections</li>
+                                <li>10,000 messages per minute</li>
+                                <li>99th percentile response time < 500ms</li>
+                            </ul>
+                        </li>
+                        <li><strong>Scalability Tests:</strong>
+                            <ul>
+                                <li>Auto-scaling verification</li>
+                                <li>Multi-AZ failover testing</li>
+                                <li>Database connection pooling</li>
+                            </ul>
+                        </li>
+                        <li><strong>Vector DB Performance Tests:</strong>
+                            <ul>
+                                <li>Qdrant vs FAISS benchmarking</li>
+                                <li>Large dataset loading (100k+ vectors)</li>
+                                <li>Metadata filtering speed</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="epic">
+                    <h3>Epic 3.3: Security Tests <span class="badge badge-unit">Unit</span></h3>
+                    <ul>
+                        <li><strong>API Security Tests:</strong>
+                            <ul>
+                                <li>JWT token validation</li>
+                                <li>Rate limiting abuse prevention</li>
+                                <li>SQL injection prevention</li>
+                            </ul>
+                        </li>
+                        <li><strong>Authentication Tests:</strong>
+                            <ul>
+                                <li>Password hash validation</li>
+                                <li>MFA enforcement</li>
+                                <li>Session fixation prevention</li>
+                            </ul>
+                        </li>
+                        <li><strong>Data Protection Tests:</strong>
+                            <ul>
+                                <li>Encryption at rest verification</li>
+                                <li>Encryption in transit (TLS 1.3)</li>
+                                <li>Data loss prevention checks</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="milestone">
+                    <h3>🎉 Phase 3 Success Criteria</h3>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>✅ 100+ tenants supported</li>
+                        <li>✅ Instagram integration complete</li>
+                        <li>✅ Enterprise features working</li>
+                        <li>✅ SLA: 99.9% uptime maintained</li>
+                        <li>✅ All security tests passing</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h2>🛠️ Testing Tools & Technologies</h2>
+            <p>Technology stack for comprehensive testing</p>
+        </div>
+
+        <div class="tech-grid">
+            <div class="tech-card">
+                <h4><span class="tech-name">Pytest</span></h4>
+                <p>Python testing framework. Industry standard, async support (pytest-asyncio), rich plugin ecosystem (pytest-html, pytest-xdist).</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><span class="tech-name">Playwright</span></h4>
+                <p>Cross-browser E2E testing. Supports Chrome, Firefox, WebKit. Automated UI interactions, screenshots, network monitoring.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><span class="tech-name">Locust</span></h4>
+                <p>Python-based load testing. Scripted in Python, real-time graphs, distributed test execution, concurrent user simulation.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><span class="tech-name">Snyk</span></h4>
+                <p>Security vulnerability scanning. Dependency CVE detection, container image scanning, security advisory management.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><span class="tech-name">Coverage.py</span></h4>
+                <p>Python code coverage tool. Line/function/branch coverage, HTML reports, integration with pytest.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><span class="tech-name">Allure</span></h4>
+                <p>Beautiful test reporting. Cross-platform, interactive dashboards, historical trend analysis, CI/CD integration.</p>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h2>📊 Test Structure</h2>
+            <p>Complete test directory layout</p>
+        </div>
+
+        <div class="code-block">
+<pre><code>test/
+├── __init__.py
+├── conftest.py                 # Shared fixtures
+├── pytest.ini                  # Pytest configuration
+│
+├── channels/                   # Channel integration tests
+│   ├── __init__.py
+│   ├── conftest.py
+│   ├── test_zalo_channel.py    # Zalo webhook tests
+│   ├── test_facebook_channel.py # Facebook Messenger tests
+│   └── test_instagram_channel.py # Instagram Direct tests
+│
+├── rag/                       # RAG pipeline tests
+│   ├── __init__.py
+│   ├── conftest.py
+│   ├── test_rag_pipeline.py    # Full RAG pipeline tests
+│   ├── test_embedding.py       # Embedding quality tests
+│   ├── test_retrieval.py       # Vector search tests
+│   └── test_context.py         # Context injection tests
+│
+├── tools/                     # Tool calling tests
+│   ├── __init__.py
+│   ├── conftest.py
+│   ├── test_tool_calling.py    # Tool invocation tests
+│   ├── test_tool_schema.py     # Schema validation tests
+│   └── test_tool_security.py   # Tool security tests
+│
+├── tenants/                   # Multi-tenancy tests
+│   ├── __init__.py
+│   ├── conftest.py
+│   ├── test_isolation.py       # Data isolation tests
+│   ├── test_quota.py           # Quota management tests
+│   └── test_admin.py           # Admin permissions tests
+│
+├── admin/                     # Admin dashboard E2E tests
+│   ├── __init__.py
+│   ├── conftest.py
+│   ├── test_login.py           # Login/logout tests
+│   ├── test_knowledge.py       # Knowledge management tests
+│   ├── test_tools.py           # Tool management tests
+│   └── test_analytics.py       # Analytics dashboard tests
+│
+├── load/                      # Load/performance tests
+│   ├── __init__.py
+│   ├── conftest.py
+│   ├── test_concurrent.py      # Concurrent user tests
+│   ├── test_response_time.py   # Response time tests
+│   └── test_scalability.py     # Scalability tests
+│
+├── security/                  # Security tests
+│   ├── __init__.py
+│   ├── conftest.py
+│   ├── test_auth.py            # Authentication tests
+│   ├── test_apis.py            # API security tests
+│   └── test_data.py            # Data protection tests
+│
+├── fixtures/                  # Test fixtures
+│   ├── channels/              # Channel webhook mocks
+│   │   ├── mock_zalo_webhook.json
+│   │   ├── mock_facebook_webhook.json
+│   │   └── mock_instagram_webhook.json
+│   ├── documents/             # Test knowledge documents
+│   │   ├── sample.pdf
+│   │   ├── sample.txt
+│   │   └── sample.csv
+│   └── responses/             # Expected LLM responses
+│       ├── return_policy.json
+│       └── shipping.json
+│
+└── reports/                   # Test reports
+    ├── e2e-summary.html
+    ├── coverage.html
+    └── security-report.html
+</code></pre>
+        </div>
+
+        <div class="comparison-table">
+            <h2>🔬 Testing Coverage by Phase</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Phase</th>
+                        <th>Unit Tests</th>
+                        <th>Integration Tests</th>
+                        <th>E2E Tests</th>
+                        <th>Load Tests</th>
+                        <th>Security Tests</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>POC</strong></td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td>Basic</td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td><strong>MVP</strong></td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Production</strong></td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="risk-section">
+            <h4>⚠️ Testing Challenges & Solutions</h4>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li><strong>LLM Response Variability:</strong> Use LLM response verification that focuses on structure, not exact text</li>
+                <li><strong>Webhook Rate Limits:</strong> Implement exponential backoff in tests; use mock servers</li>
+                <li><strong>Browser Compatibility:</strong> Test on multiple browsers (Chrome, Firefox, Safari)</li>
+                <li><strong>Environment Parity:</strong> Use docker-compose for test environment mirroring production</li>
+                <li><strong>Data Privacy:</strong> Never store real user data in test fixtures; use anonymized data</li>
+                <li><strong>Test Flakiness:</strong> Isolate tests that fail intermittently; investigate root cause</li>
+            </ul>
+        </div>
+
+        <div class="section-header">
+            <h2>📝 Running Tests</h2>
+            <p>How to execute different test suites</p>
+        </div>
+
+        <div class="code-block">
+<pre><code># Run all tests
+pytest test/ -v
+
+# Run E2E tests only
+pytest test/ -m e2e -v
+
+# Run specific test file
+pytest test/channels/test_zalo_channel.py -v
+
+# Run tests with coverage report
+pytest test/ -v --cov=src/backend --cov-report=html
+
+# Run load tests
+pytest test/load/ -v --locust
+
+# Generate HTML report
+pytest test/ --html=report.html --self-contained-html
+
+# Run only failing tests
+pytest test/ -v --ff
+
+# Run tests for specific channel
+pytest test/channels/ -v -m "e2e and channel"
+
+# Continuous Integration (GitHub Actions)
+pytest test/ -v --junit-xml=pytest-junit.xml --cov=src/backend
+</code></pre>
+        </div>
+
+        <footer>
+            <p><strong>SC Chatbot E2E Testing Guide</strong> | Last Updated: May 2026 | Version 1.0</p>
+            <p><a href="table-of-contents.html" style="color: #667eea;">← Back to Documentation</a></p>
+        </footer>
+    </div>
+</body>
+</html>

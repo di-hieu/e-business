@@ -1,0 +1,16 @@
+# FAISS Index - Sample for Testing
+# This is a placeholder file. Actual FAISS indexes are binary.
+# For testing purposes, we use mock_vector_store fixture.
+# 
+# To generate a real FAISS index:
+#   1. Install faiss-cpu: pip install faiss-cpu
+#   2. Generate embeddings for sample documents
+#   3. Index them with faiss.IndexFlatIP
+# 
+# Example:
+#   import faiss
+#   dim = 384  # embedding dimension
+#   index = faiss.IndexFlatIP(dim)
+#   vectors = np.random.randn(100, dim).astype('float32')
+#   index.add(vectors)
+#   faiss.write_index(index, 'sample_faiss.index')

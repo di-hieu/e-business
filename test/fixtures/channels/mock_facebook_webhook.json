@@ -1,0 +1,28 @@
+{
+  "object": "page",
+  "entry": [
+    {
+      "time": "2024-01-15T10:30:00Z",
+      "id": "entry_123456789",
+      "messaging": [
+        {
+          "message": {
+            "mid": "msg_987654321",
+            "sender": {
+              "id": "recipient_user_id"
+            },
+            "recipient": {
+              "id": "page_fb_page_id"
+            },
+            "message_id": "mid_abcdef123456",
+            "text": "Hi! I want to track my order ORD-12345",
+              "timestamp": "1234567890"
+          },
+          "optout": null,
+          "attachments": []
+        }
+      ]
+    }
+  ],
+  "verification_token": "facebook_verify_token"
+}

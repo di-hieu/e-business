@@ -1033,11 +1033,755 @@
                 </tbody>
             </table>
         </div>
-    </div>
 
-    <footer>
-        <p><strong>SC Chatbot Project Plan</strong> | Last Updated: May 2026 | Version 1.0</p>
-        <p><a href="table-of-contents.html" style="color: #667eea;">← Back to Documentation</a></p>
-    </footer>
+        <div class="section-header">
+            <h2>🧪 E2E Testing Strategy</h2>
+            <p>Comprehensive end-to-end testing plan for all project phases</p>
+        </div>
+
+        <div class="comparison-table">
+            <h2>🧪 Testing Infrastructure Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>POC Testing</th>
+                        <th>MVP Testing</th>
+                        <th>Production Testing</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Test Framework</strong></td>
+                        <td>pytest + pytest-asyncio</td>
+                        <td>Same + Playwright E2E</td>
+                        <td>Same + Playwright + Locust</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Channel Tests</strong></td>
+                        <td>Zalo webhook + message flow</td>
+                        <td>Zalo + Facebook + Instagram</td>
+                        <td>All channels + integration scenarios</td>
+                    </tr>
+                    <tr>
+                        <td><strong>RAG Tests</strong></td>
+                        <td>Retrieval accuracy, context injection</td>
+                        <td>Add response quality, latency</td>
+                        <td>Add multi-language, sentiment</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tool Tests</strong></td>
+                        <td>Function calling, parameter extraction</td>
+                        <td>Add error handling, fallbacks</td>
+                        <td>Add rate limiting, quotas</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Load Testing</strong></td>
+                        <td>None</td>
+                        <td>Locust, 1000 concurrent users</td>
+                        <td>Advanced scenarios, scaling</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Security Tests</strong></td>
+                        <td>Basic</td>
+                        <td>OWASP Top 10</td>
+                        <td>Comprehensive, compliance</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Performance Targets</strong></td>
+                        <td>N/A</td>
+                        <td>p95 < 500ms</td>
+                        <td>p95 < 200ms, 99.9% uptime</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Test Coverage</strong></td>
+                        <td>Core flows only</td>
+                        <td>> 70%</td>
+                        <td>> 85%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="work-breakdown">
+            <h2>🧪 E2E Testing Strategy</h2>
+            <p>Detailed breakdown of all testing activities and their dependencies</p>
+        </div>
+
+        <div class="section-header">
+            <h2>🧪 E2E Testing Phases</h2>
+            <p>Detailed implementation plan for each testing phase</p>
+        </div>
+
+        <div class="phase">
+            <h2>🧪 Phase 1: E2E Testing Framework Setup <span class="badge badge-progress">MONTHS 1-2</span></h2>
+            <div class="phase-meta">
+                <div class="meta-item"><strong>Duration:</strong> 2 months</div>
+                <div class="meta-item"><strong>Timeline:</strong> Month 1-2</div>
+                <div class="meta-item"><strong>Goal:</strong> Foundation for all testing</div>
+                <div class="meta-item"><strong>Team:</strong> QA Engineer + Backend Developer</div>
+            </div>
+            
+            <div class="milestone">
+                <h3>🎉 Success Criteria</h3>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>✅ Complete test directory structure created</li>
+                    <li>✅ All shared fixtures and mocks configured</li>
+                    <li>✅ CI/CD pipeline integrated with test suite</li>
+                    <li>✅ Base test coverage > 30%</li>
+                </ul>
+            </div>
+
+            <div class="epic">
+                <h3>EPIC 1.1: Test Infrastructure Foundation <span class="badge badge-planned">PLANNED</span></h3>
+                <ul>
+                    <li><input type="checkbox" class="task-checkbox"> Create test/ directory structure</li>
+                    <li><input type="checkbox" class="task-checkbox"> Setup pytest with async support (pytest-asyncio)</li>
+                    <li><input type="checkbox" class="task-checkbox"> Install test dependencies (Playwright, Locust, etc.)</li>
+                    <li><input type="checkbox" class="task-checkbox"> Create conftest.py with shared fixtures</li>
+                    <li><input type="checkbox" class="task-checkbox"> Write test_config.py for environment variables</li>
+                    <li><input type="checkbox" class="task-checkbox"> Setup Playwright browser contexts</li>
+                    <li><input type="checkbox" class="task-checkbox"> Configure test database (test SQLite/PostgreSQL)</li>
+                    <li><input type="checkbox" class="task-checkbox"> Create Docker Compose for test services</li>
+                </ul>
+                <div class="dependencies">
+                    <h4>🔗 Dependencies:</h4>
+                    <p>Python 3.11+, pip, Docker</p>
+                </div>
+            </div>
+
+            <div class="epic">
+                <h3>EPIC 1.2: Test Data & Mock Services <span class="badge badge-planned">PLANNED</span></h3>
+                <ul>
+                    <li><input type="checkbox" class="task-checkbox"> Create fixtures.py with test data generators</li>
+                    <li><input type="checkbox" class="task-checkbox"> Implement ZaloMock for API mocking</li>
+                    <li><input type="checkbox" class="task-checkbox"> Implement FacebookMock for Graph API</li>
+                    <li><input type="checkbox" class="task-checkbox"> Implement InstagramMock for Graph API</li>
+                    <li><input type="checkbox" class="task-checkbox"> Create sample knowledge base documents</li>
+                    <li><input type="checkbox" class="task-checkbox"> Generate test conversations</li>
+                    <li><input type="checkbox" class="task-checkbox"> Create sample tool definitions</li>
+                </ul>
+                <div class="dependencies">
+                    <h4>🔗 Dependencies:</h4>
+                    <p>EPIC 1.1 completed</p>
+                </div>
+            </div>
+
+            <div class="epic">
+                <h3>EPIC 1.3: CI/CD Integration <span class="badge badge-planned">PLANNED</span></h3>
+                <ul>
+                    <li><input type="checkbox" class="task-checkbox"> Create GitHub Actions workflow (tests.yml)</li>
+                    <li><input type="checkbox" class="task-checkbox"> Setup code coverage reporting (codecov)</li>
+                    <li><input type="checkbox" class="task-checkbox"> Configure test result artifacts</li>
+                    <li><input type="checkbox" class="task-checkbox"> Add test report generation</li>
+                </ul>
+                <div class="dependencies">
+                    <h4>🔗 Dependencies:</h4>
+                    <p>EPIC 1.1, EPIC 1.2 completed</p>
+                </div>
+            </div>
+
+            <div class="risk-section">
+                <h4>⚠️ Phase 1 Risks & Mitigation</h4>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>Test environment conflicts:</strong> Use isolated test database, separate from production</li>
+                    <li><strong>Mock service reliability:</strong> Implement fallback behaviors, thorough error handling</li>
+                    <li><strong>API changes:</strong> Design mocks to be resilient to API changes</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="phase">
+            <h2>🧪 Phase 2: E2E Test Implementation <span class="badge badge-planned">MONTHS 2-3</span></h2>
+            <div class="phase-meta">
+                <div class="meta-item"><strong>Duration:</strong> 2 months</div>
+                <div class="meta-item"><strong>Timeline:</strong> Month 2-3</div>
+                <div class="meta-item"><strong>Goal:</strong> Comprehensive test coverage</div>
+                <div class="meta-item"><strong>Team:</strong> QA Engineer + Backend Developer</div>
+            </div>
+            
+            <div class="milestone">
+                <h3>🎉 Success Criteria</h3>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>✅ All channel integration tests passing</li>
+                    <li>✅ RAG accuracy tests covering all scenarios</li>
+                    <li>✅ Function calling tests complete</li>
+                    <li>✅ Multi-tenancy isolation validated</li>
+                    <li>✅ Admin dashboard E2E tests passing</li>
+                </ul>
+            </div>
+
+            <div class="epic">
+                <h3>EPIC 2.1: Channel Integration E2E Tests <span class="badge badge-planned">PLANNED</span></h3>
+                <ul>
+                    <li><input type="checkbox" class="task-checkbox"> Zalo webhook receiver tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Zalo message flow tests (end-to-end)</li>
+                    <li><input type="checkbox" class="task-checkbox"> Zalo conversation memory tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Facebook webhook receiver tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Facebook message flow tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Instagram webhook receiver tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Instagram message flow tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Cross-channel scenario tests</li>
+                </ul>
+                <div class="dependencies">
+                    <h4>🔗 Dependencies:</h4>
+                    <p>EPIC 1.1-1.3 completed, backend APIs ready</p>
+                </div>
+            </div>
+
+            <div class="epic">
+                <h3>EPIC 2.2: RAG E2E Tests <span class="badge badge-planned">PLANNED</span></h3>
+                <ul>
+                    <li><input type="checkbox" class="task-checkbox"> Semantic search accuracy tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Context injection quality tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> LLM response helpfulness tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Multi-language RAG tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Knowledge update validation tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Chunking strategy tests</li>
+                </ul>
+                <div class="dependencies">
+                    <h4>🔗 Dependencies:</h4>
+                    <p>RAG pipeline implementation complete</p>
+                </div>
+            </div>
+
+            <div class="epic">
+                <h3>EPIC 2.3: Function Calling E2E Tests <span class="badge badge-planned">PLANNED</span></h3>
+                <ul>
+                    <li><input type="checkbox" class="task-checkbox"> Tool selection accuracy tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Parameter extraction tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Tool execution validation tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Error handling tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Fallback behavior tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Rate limiting tests</li>
+                </ul>
+                <div class="dependencies">
+                    <h4>🔗 Dependencies:</h4>
+                    <p>Tool framework implementation complete</p>
+                </div>
+            </div>
+
+            <div class="epic">
+                <h3>EPIC 2.4: Multi-Tenancy E2E Tests <span class="badge badge-planned">PLANNED</span></h3>
+                <ul>
+                    <li><input type="checkbox" class="task-checkbox"> Data isolation validation tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Tenant ID enforcement tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Cross-tenant query prevention tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> API key isolation tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Rate limiting per-tenant tests</li>
+                </ul>
+                <div class="dependencies">
+                    <h4>🔗 Dependencies:</h4>
+                    <p>Multi-tenancy implementation complete</p>
+                </div>
+            </div>
+
+            <div class="epic">
+                <h3>EPIC 2.5: Admin Dashboard E2E Tests <span class="badge badge-planned">PLANNED</span></h3>
+                <ul>
+                    <li><input type="checkbox" class="task-checkbox"> Login/Authentication tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Knowledge upload flow tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Tool definition UI tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Analytics dashboard tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Conversation viewer tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> User management UI tests</li>
+                </ul>
+                <div class="dependencies">
+                    <h4>🔗 Dependencies:</h4>
+                    <p>Admin dashboard UI complete</p>
+                </div>
+            </div>
+
+            <div class="risk-section">
+                <h4>⚠️ Phase 2 Risks & Mitigation</h4>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>Test flakiness:</strong> Implement proper wait conditions, retry logic for flaky tests</li>
+                    <li><strong>Browser compatibility:</strong> Test on multiple browsers (Chrome, Firefox, Safari)</li>
+                    <li><strong>Rate limiting issues:</strong> Add delays between test requests, implement test-specific rate limits</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="phase">
+            <h2>🧪 Phase 3: Load & Performance Testing <span class="badge badge-planned">MONTHS 4-5</span></h2>
+            <div class="phase-meta">
+                <div class="meta-item"><strong>Duration:</strong> 2 months</div>
+                <div class="meta-item"><strong>Timeline:</strong> Month 4-5</div>
+                <div class="meta-item"><strong>Goal:</strong> Performance validation at scale</div>
+                <div class="meta-item"><strong>Team:</strong> QA Engineer + DevOps Engineer</div>
+            </div>
+            
+            <div class="milestone">
+                <h3>🎉 Success Criteria</h3>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>✅ Load tests pass at 1000+ concurrent users</li>
+                    <li>✅ p95 latency < 500ms under load</li>
+                    <li>✅ Error rate < 0.1% under stress</li>
+                    <li>✅ Auto-scaling works correctly</li>
+                    <li>✅ Performance regression detected early</li>
+                </ul>
+            </div>
+
+            <div class="epic">
+                <h3>EPIC 3.1: Load Testing Setup <span class="badge badge-planned">PLANNED</span></h3>
+                <ul>
+                    <li><input type="checkbox" class="task-checkbox"> Setup Locust for load testing</li>
+                    <li><input type="checkbox" class="task-checkbox"> Create chatbot user types</li>
+                    <li><input type="checkbox" class="task-checkbox"> Create admin user types</li>
+                    <li><input type="checkbox" class="task-checkbox"> Setup test scenarios (baseline, load, stress, soak)</li>
+                    <li><input type="checkbox" class="task-checkbox"> Configure test environment</li>
+                    <li><input type="checkbox" class="task-checkbox"> Setup performance metrics collection</li>
+                </ul>
+                <div class="dependencies">
+                    <h4>🔗 Dependencies:</h4>
+                    <p>Epic 1-2 completed, production-like environment</p>
+                </div>
+            </div>
+
+            <div class="epic">
+                <h3>EPIC 3.2: Performance Test Execution <span class="badge badge-planned">PLANNED</span></h3>
+                <ul>
+                    <li><input type="checkbox" class="task-checkbox"> Execute baseline performance tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Execute load tests (incremental users)</li>
+                    <li><input type="checkbox" class="task-checkbox"> Execute stress tests (beyond breaking point)</li>
+                    <li><input type="checkbox" class="task-checkbox"> Execute soak tests (long-duration stability)</li>
+                    <li><input type="checkbox" class="task-checkbox"> Analyze performance results</li>
+                    <li><input type="checkbox" class="task-checkbox"> Optimize bottlenecks</li>
+                    <li><input type="checkbox" class="task-checkbox"> Re-run tests after optimizations</li>
+                </ul>
+                <div class="dependencies">
+                    <h4>🔗 Dependencies:</h4>
+                    <p>Epic 3.1 completed</p>
+                </div>
+            </div>
+
+            <div class="epic">
+                <h3>EPIC 3.3: Scalability Testing <span class="badge badge-planned">PLANNED</span></h3>
+                <ul>
+                    <li><input type="checkbox" class="task-checkbox"> Horizontal scaling tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Vertical scaling tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Database scaling tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Cache scaling tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Vector DB scaling tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Load balancer tests</li>
+                </ul>
+                <div class="dependencies">
+                    <h4>🔗 Dependencies:</h4>
+                    <p>Kubernetes cluster or equivalent</p>
+                </div>
+            </div>
+
+            <div class="risk-section">
+                <h4>⚠️ Phase 3 Risks & Mitigation</h4>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>LLM latency variance:</strong> Use cached responses for load tests, separate test LLM calls</li>
+                    <li><strong>Cost control:</strong> Set test spending limits, use smaller models for tests</li>
+                    <li><strong>Noisy neighbors:</strong> Use dedicated test environment</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="phase">
+            <h2>🧪 Phase 4: Security & Compliance Testing <span class="badge badge-planned">MONTHS 5-6</span></h2>
+            <div class="phase-meta">
+                <div class="meta-item"><strong>Duration:</strong> 2 months</div>
+                <div class="meta-item"><strong>Timeline:</strong> Month 5-6</div>
+                <div class="meta-item"><strong>Goal:</strong> Security validation</div>
+                <div class="meta-item"><strong>Team:</strong> Security Specialist + QA Engineer</div>
+            </div>
+            
+            <div class="milestone">
+                <h3>🎉 Success Criteria</h3>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>✅ OWASP Top 10 tests pass</li>
+                    <li>✅ SQL injection protection verified</li>
+                    <li>✅ XSS protection verified</li>
+                    <li>✅ Multi-tenant isolation verified</li>
+                    <li>✅ Audit logging complete</li>
+                </ul>
+            </div>
+
+            <div class="epic">
+                <h3>EPIC 4.1: Security Tests <span class="badge badge-planned">PLANNED</span></h3>
+                <ul>
+                    <li><input type="checkbox" class="task-checkbox"> SQL injection prevention tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> XSS protection tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Authentication bypass tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Authorization tests (RBAC)</li>
+                    <li><input type="checkbox" class="task-checkbox"> Data encryption tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Session management tests</li>
+                </ul>
+                <div class="dependencies">
+                    <h4>🔗 Dependencies:</h4>
+                    <p>Security implementation complete</p>
+                </div>
+            </div>
+
+            <div class="epic">
+                <h3>EPIC 4.2: OWASP Top 10 Testing <span class="badge badge-planned">PLANNED</span></h3>
+                <ul>
+                    <li><input type="checkbox" class="task-checkbox"> A01: Broken Access Control</li>
+                    <li><input type="checkbox" class="task-checkbox"> A02: Cryptographic Failures</li>
+                    <li><input type="checkbox" class="task-checkbox"> A03: Injection</li>
+                    <li><input type="checkbox" class="task-checkbox"> A04: Insecure Design</li>
+                    <li><input type="checkbox" class="task-checkbox"> A05: Security Misconfiguration</li>
+                    <li><input type="checkbox" class="task-checkbox"> A06: Vulnerable Components</li>
+                    <li><input type="checkbox" class="task-checkbox"> A07: Auth. Failures</li>
+                    <li><input type="checkbox" class="task-checkbox"> A08: Software & Data Integrity</li>
+                    <li><input type="checkbox" class="task-checkbox"> A09: Security Logging</li>
+                    <li><input type="checkbox" class="task-checkbox"> A10: SSRF</li>
+                </ul>
+                <div class="dependencies">
+                    <h4>🔗 Dependencies:</h4>
+                    <p>Epic 4.1 completed</p>
+                </div>
+            </div>
+
+            <div class="risk-section">
+                <h4>⚠️ Phase 4 Risks & Mitigation</h4>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>False positives:</strong> Review security test results carefully</li>
+                    <li><strong>Performance impact:</strong> Run security tests in separate environment</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="phase">
+            <h2>🧪 Phase 5: Production Readiness Testing <span class="badge badge-planned">MONTHS 10-21</span></h2>
+            <div class="phase-meta">
+                <div class="meta-item"><strong>Duration:</strong> 12 months</div>
+                <div class="meta-item"><strong>Timeline:</strong> Month 10-21</div>
+                <div class="meta-item"><strong>Goal:</strong> Enterprise-grade validation</div>
+                <div class="meta-item"><strong>Team:</strong> QA Team + DevOps + Security</div>
+            </div>
+            
+            <div class="milestone">
+                <h3>🎉 Success Criteria</h3>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>✅ 100+ tenant validation</li>
+                    <li>✅ 10,000+ DAU simulation</li>
+                    <li>✅ 99.9% uptime validation</li>
+                    <li>✅ Multi-region failover tested</li>
+                    <li>✅ Compliance audit passed</li>
+                </ul>
+            </div>
+
+            <div class="epic">
+                <h3>EPIC 5.1: Multi-Region Failover Tests <span class="badge badge-planned">PLANNED</span></h3>
+                <ul>
+                    <li><input type="checkbox" class="task-checkbox"> Database failover tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Cache failover tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Load balancer failover tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> DNS failover tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Regional outage simulation</li>
+                </ul>
+                <div class="dependencies">
+                    <h4>🔗 Dependencies:</h4>
+                    <p>Multi-region deployment complete</p>
+                </div>
+            </div>
+
+            <div class="epic">
+                <h3>EPIC 5.2: Disaster Recovery Testing <span class="badge badge-planned">PLANNED</span></h3>
+                <ul>
+                    <li><input type="checkbox" class="task-checkbox"> Backup restore tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Data loss simulation</li>
+                    <li><input type="checkbox" class="task-checkbox"> Recovery time validation</li>
+                    <li><input type="checkbox" class="task-checkbox"> RPO/RTO measurement</li>
+                </ul>
+                <div class="dependencies">
+                    <h4>🔗 Dependencies:</h4>
+                    <p>Backup systems complete</p>
+                </div>
+            </div>
+
+            <div class="epic">
+                <h3>EPIC 5.3: Compliance Testing <span class="badge badge-planned">PLANNED</span></h3>
+                <ul>
+                    <li><input type="checkbox" class="task-checkbox"> GDPR compliance tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> SOC 2 testing</li>
+                    <li><input type="checkbox" class="task-checkbox"> Data privacy tests</li>
+                    <li><input type="checkbox" class="task-checkbox"> Audit logging validation</li>
+                </ul>
+                <div class="dependencies">
+                    <h4>🔗 Dependencies:</h4>
+                    <p>Compliance features implemented</p>
+                </div>
+            </div>
+
+            <div class="risk-section">
+                <h4>⚠️ Phase 5 Risks & Mitigation</h4>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>Compliance complexity:</strong> Engage legal/compliance consultants early</li>
+                    <li><strong>Cost of enterprise tests:</strong> Plan budget carefully</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="comparison-table">
+            <h2>🧪 Testing Success Criteria</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>POC Target</th>
+                        <th>MVP Target</th>
+                        <th>Production Target</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Test Coverage</strong></td>
+                        <td>Core flows</td>
+                        <td>> 70%</td>
+                        <td>> 85%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>E2E Pass Rate</strong></td>
+                        <td>N/A</td>
+                        <td>> 95%</td>
+                        <td>> 98%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>RAG Accuracy</strong></td>
+                        <td>N/A</td>
+                        <td>> 80%</td>
+                        <td>> 85%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Response Time (p95)</strong></td>
+                        <td>N/A</td>
+                        <td>< 500ms</td>
+                        <td>< 200ms</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Error Rate</strong></td>
+                        <td>N/A</td>
+                        <td>< 1%</td>
+                        <td>< 0.1%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Uptime SLA</strong></td>
+                        <td>N/A</td>
+                        <td>99%</td>
+                        <td>99.9%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Security Tests</strong></td>
+                        <td>Basic</td>
+                        <td>OWASP Top 10</td>
+                        <td>Full + Custom</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Load Capacity</strong></td>
+                        <td>N/A</td>
+                        <td>1000 users</td>
+                        <td>10,000+ users</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="work-breakdown">
+            <h2>📋 Testing Work Breakdown Structure (WBS)</h2>
+            <div class="wbs-level-1">
+                <h4>1.0 E2E Testing</h4>
+                <div class="wbs-level-2">
+                    <div class="wbs-item">
+                        <h4>1.1 Framework Setup</h4>
+                        <ul>
+                            <li>1.1.1 Directory structure</li>
+                            <li>1.1.2 pytest configuration</li>
+                            <li>1.1.3 Playwright setup</li>
+                            <li>1.1.4 CI/CD integration</li>
+                        </ul>
+                    </div>
+                    <div class="wbs-item">
+                        <h4>1.2 Test Data</h4>
+                        <ul>
+                            <li>1.2.1 Fixtures</li>
+                            <li>1.2.2 Mock services</li>
+                            <li>1.2.3 Test scenarios</li>
+                        </ul>
+                    </div>
+                    <div class="wbs-item">
+                        <h4>1.3 Channel Tests</h4>
+                        <ul>
+                            <li>1.3.1 Zalo tests</li>
+                            <li>1.3.2 Facebook tests</li>
+                            <li>1.3.3 Instagram tests</li>
+                        </ul>
+                    </div>
+                    <div class="wbs-item">
+                        <h4>1.4 RAG Tests</h4>
+                        <ul>
+                            <li>1.4.1 Retrieval tests</li>
+                            <li>1.4.2 Context tests</li>
+                            <li>1.4.3 Quality tests</li>
+                        </ul>
+                    </div>
+                    <div class="wbs-item">
+                        <h4>1.5 Tool Tests</h4>
+                        <ul>
+                            <li>1.5.1 Selection tests</li>
+                            <li>1.5.2 Parameter tests</li>
+                            <li>1.5.3 Execution tests</li>
+                        </ul>
+                    </div>
+                    <div class="wbs-item">
+                        <h4>1.6 Tenant Tests</h4>
+                        <ul>
+                            <li>1.6.1 Isolation tests</li>
+                            <li>1.6.2 Enforcement tests</li>
+                        </ul>
+                    </div>
+                    <div class="wbs-item">
+                        <h4>1.7 Dashboard Tests</h4>
+                        <ul>
+                            <li>1.7.1 Login tests</li>
+                            <li>1.7.2 Feature tests</li>
+                        </ul>
+                    </div>
+                    <div class="wbs-item">
+                        <h4>1.8 Load Tests</h4>
+                        <ul>
+                            <li>1.8.1 Locust setup</li>
+                            <li>1.8.2 Scenarios</li>
+                            <li>1.8.3 Execution</li>
+                        </ul>
+                    </div>
+                    <div class="wbs-item">
+                        <h4>1.9 Security Tests</h4>
+                        <ul>
+                            <li>1.9.1 OWASP tests</li>
+                            <li>1.9.2 Compliance tests</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary">
+            <h2>🎯 Critical Testing Success Factors</h2>
+            <ul style="margin-left: 20px; margin-top: 15px;">
+                <li><strong>Test early, test often:</strong> Start testing in POC phase, don't wait</li>
+                <li><strong>Mock external services:</strong> Design tests that work even when APIs are unavailable</li>
+                <li><strong>Automate everything:</strong> CI/CD integration catches regressions early</li>
+                <li><strong>Focus on E2E:</strong> Integration bugs are harder to find in unit tests</li>
+                <li><strong>Performance matters:</strong> Catch regressions before production</li>
+                <li><strong>Security by design:</strong> Don't wait until end to test security</li>
+                <li><strong>Mock LLM responses:</strong> Deterministic tests are easier to debug</li>
+                <li><strong>Visual regression:</strong> Dashboard UI changes need visual tests</li>
+            </ul>
+        </div>
+
+        <div class="section-header">
+            <h2>📚 Testing Glossary</h2>
+            <p>Definitions of key testing terms</p>
+        </div>
+        
+        <div class="tech-grid">
+            <div class="tech-card">
+                <h4><strong>E2E (End-to-End)</strong></h4>
+                <p>Tests that simulate real user scenarios from start to finish, involving multiple components and services.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>Fixtures</strong></h4>
+                <p>Pre-configured test data and setups that are reused across multiple tests.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>Mocking</strong></h4>
+                <p>Replacing external dependencies with simulated versions for testing without real API calls.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>Load Testing</strong></h4>
+                <p>Simulating high traffic to validate system performance under expected load.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>Stress Testing</strong></h4>
+                <p>Pushing system beyond expected limits to identify breaking points and graceful failure behavior.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>Soak Testing</strong></h4>
+                <p>Long-duration testing to detect memory leaks and stability issues under sustained load.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>OWASP Top 10</strong></h4>
+                <p>Commonly known web application security risks that should be addressed.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>RAG Accuracy</strong></h4>
+                <p>Measurement of how well the retrieval-augmented generation system finds relevant information.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>Multi-Tenancy</strong></h4>
+                <p>Architecture where single instance serves multiple customers with data isolation.</p>
+            </div>
+            
+            <div class="tech-card">
+                <h4><strong>Rate Limiting</strong></h4>
+                <p>Restricting API request frequency to prevent abuse and manage resources fairly.</p>
+            </div>
+        </div>
+
+        <div class="tech-stack">
+            <h2>🧪 Testing Dependencies</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Package</th>
+                        <th>Version</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>pytest</strong></td>
+                        <td>8.0.0+</td>
+                        <td>Test framework</td>
+                    </tr>
+                    <tr>
+                        <td><strong>pytest-asyncio</strong></td>
+                        <td>0.23.0+</td>
+                        <td>Async test support</td>
+                    </tr>
+                    <tr>
+                        <td><strong>pytest-cov</strong></td>
+                        <td>4.1.0+</td>
+                        <td>Cov</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Playwright</strong></td>
+                        <td>=1.40.0</td>
+                        <td>E2E browser automation</td>
+                    </tr>
+                    <tr>
+                        <td><strong>locust</strong></td>
+                        <td>2.21.0</td>
+                        <td>Load testing framework</td>
+                    </tr>
+                    <tr>
+                        <td><strong>pydantic</strong></td>
+                        <td>=2.6.0</td>
+                        <td>Data validation, tool schemas</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            <p>📄 Last updated: {{ now.strftime('%Y-%m-%d %H:%M') }} | SC Chatbot Project Plan</p>
+            <p style="margin-top: 10px;">🔗 Navigation: <a href="table-of-contents.html">Table of Contents</a> | <a href="architecture.html">Architecture Overview</a> | <a href="api-reference.html">API Reference</a></p>
+            <p style="margin-top: 15px;">🛡️ Built with Python 3.11+ | LangChain | FastAPI | React 18 | Docker</p>
+        </div>
+    </div>
 </body>
 </html>

@@ -1,0 +1,19 @@
+{
+  "event_type": "message",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "hub": {
+    "mode": "subscribe",
+    "verify_token": "zalo_verify_token"
+  },
+  "payload": {
+    "to": "1234567890",
+    "from": "zalo_oa_id",
+    "message": {
+      "type": "text",
+      "content": "Xapi:10000234567890\nTo: 1234567890\nFrom: zalo_oa_id\nMsgtype: text\nMsgdata:Hello, I want to check my order status"
+    },
+    "template": null,
+    "images": [],
+    "audio": null
+  }
+}

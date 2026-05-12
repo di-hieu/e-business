@@ -1,0 +1,143 @@
+# Docker Compose for SC Chatbot Testing Environment
+# This file sets up all test dependencies for E2E testing
+
+version: '3.8'
+
+services:
+  # PostgreSQL for integration tests
+  test-postgres:
+    image: postgres:15-alpine
+    container_name: scc_test_postgres
+    environment:
+      POSTGRES_USER: ${TEST_POSTGRES_USER:-testuser}
+      POSTGRES_PASSWORD: ${TEST_POSTGRES_PASSWORD:-testpass}
+      POSTGRES_DB: ${TEST_POSTGRES_DATABASE:-test_scc}
+    ports:
+      - "${TEST_POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - scc_test_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${TEST_POSTGRES_USER:-testuser}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - scc_test_network
+
+  # Redis for caching and session management
+  test-redis:
+    image: redis:7-alpine
+    container_name: scc_test_redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - scc_test_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - scc_test_network
+
+  # Vector DB for RAG tests (Qdrant)
+  test-qdrant:
+    image: qdrant/qdrant:latest
+    container_name: scc_test_qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - scc_test_qdrant_data:/qdrant/storage
+    environment:
+      QDRANT__SERVICE__HOST: 0.0.0.0
+    networks:
+      - scc_test_network
+
+  # FAISS (file-based, no service needed for POC)
+  # Vector store is handled via FAISS files in test/fixtures/data
+
+  # Admin service (React frontend)
+  test-admin:
+    build:
+      context: ../src/frontend
+      dockerfile: Dockerfile.test
+    container_name: scc_test_admin
+    ports:
+      - "${ADMIN_PORT:-3000}:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - REACT_APP_TEST_MODE=true
+    depends_on:
+      - test-postgres
+    networks:
+      - scc_test_network
+
+  # API service (backend)
+  test-api:
+    build:
+      context: ../src/backend
+      dockerfile: Dockerfile.test
+    container_name: scc_test_api
+    environment:
+      - ENVIRONMENT=testing
+      - DATABASE_URL=postgresql://${TEST_POSTGRES_USER:-testuser}:${TEST_POSTGRES_PASSWORD:-testpass}@${TEST_POSTGRES_HOST:-test-postgres}:${TEST_POSTGRES_PORT:-5432}/${TEST_POSTGRES_DATABASE:-test_scc}
+      - REDIS_URL=redis://${TEST_REDIS_HOST:-test-redis}:6379
+      - TEST_LLM_PROVIDER=${TEST_LLM_PROVIDER:-mock}
+      - LLM_API_KEY=${TEST_LLM_API_KEY}
+      - ZALO_CLIENT_ID=${TEST_ZALO_CLIENT_ID}
+      - ZALO_CLIENT_SECRET=${TEST_ZALO_CLIENT_SECRET}
+      - FACEBOOK_APP_ID=${TEST_FACEBOOK_APP_ID}
+      - FACEBOOK_APP_SECRET=${TEST_FACEBOOK_APP_SECRET}
+      - INSTAGRAM_CLIENT_ID=${TEST_INSTAGRAM_CLIENT_ID}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - test-postgres
+      - test-redis
+    networks:
+      - scc_test_network
+
+  # Monitoring (optional for tests)
+  test-grafana:
+    image: grafana/grafana:10.2.0
+    container_name: scc_test_grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - scc_test_grafana_data:/var/lib/grafana
+    networks:
+      - scc_test_network
+
+volumes:
+  scc_test_postgres_data:
+  scc_test_redis_data:
+  scc_test_qdrant_data:
+  scc_test_grafana_data:
+
+networks:
+  scc_test_network:
+    driver: bridge
+
+# ==============================================================================
+# Testing Workflows
+# ==============================================================================
+
+# Run all tests:
+#   docker-compose -f docker-compose.test.yml up -d
+#   pytest test/ -v --cov=src/backend
+#   docker-compose -f docker-compose.test.yml down
+
+# Run tests with real database:
+#   docker-compose -f docker-compose.test.yml up -d
+#   pytest test/integration -v
+
+# Run E2E tests only:
+#   pytest test/admin -v --e2e
+
+# Run load tests:
+#   pytest test/load -v --run-happy-path
+# ==============================================================================

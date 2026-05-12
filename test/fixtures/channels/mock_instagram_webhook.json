@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "version": "17000000",
+    "sourced_from_source": "instagram_api"
+  },
+  "data": [
+    {
+      "id": "289174827123456789",
+      "created_at": "1705315800",
+      "user": {
+        "username": "test_business_account",
+        "pk": "12345678901",
+        "is_verified": false
+      },
+      "message": {
+        "text": "Hi! I want to order the blue dress online",
+        "id": "289174827123456789:1"
+      },
+      "is_replay": false,
+      "device": null,
+      "client_cache_key": "289174827123456789",
+      "timestamp": "1705315800"
+    }
+  ]
+}

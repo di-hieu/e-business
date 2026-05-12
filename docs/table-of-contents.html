@@ -8,159 +8,181 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; margin-bottom: 30px; text-align: center; }
-        header h1 { font-size: 2.5rem; margin-bottom: 10px; }
-        header p { font-size: 1.1rem; opacity: 0.9; }
-        .nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .nav-card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-decoration: none; color: inherit; transition: transform 0.2s; }
-        .nav-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
-        .nav-card h3 { color: #667eea; margin-bottom: 10px; font-size: 1.3rem; }
-        .nav-card p { font-size: 0.9rem; color: #666; }
-        .icon { font-size: 2rem; margin-bottom: 15px; display: block; }
-        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-top: 10px; }
-        .badge-poc { background: #e3f2fd; color: #1976d2; }
-        .badge-prod { background: #e8f5e9; color: #388e3c; }
-        .badge-mvp { background: #f3e5f5; color: #7b1fa2; }
-        .badge-planned { background: #fff3e0; color: #f57c00; }
-        .badge-done { background: #c8e6c9; color: #2e7d32; }
-        .badge-active { background: #c8e6c9; color: #2e7d32; }
-        .footer-note { background: white; border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .footer-note h3 { color: #667eea; margin-bottom: 15px; font-size: 1.2rem; }
-        .footer-note ul { margin-left: 20px; }
-        .footer-note li { margin-bottom: 10px; color: #555; }
-        .footer-note a { color: #667eea; text-decoration: none; }
-        footer { text-align: center; padding: 20px; color: #666; font-size: 0.9rem; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        header h1 { font-size: 2.8rem; margin-bottom: 10px; }
+        header p { font-size: 1.2rem; opacity: 0.95; }
+        nav { background: white; border-radius: 12px; padding: 25px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        nav h2 { color: #667eea; margin-bottom: 20px; font-size: 1.5rem; }
+        nav a { display: block; padding: 12px 15px; margin: 5px 0; color: #444; text-decoration: none; border-radius: 6px; transition: background 0.2s; }
+        nav a:hover { background: #f8f9fa; color: #667eea; }
+        nav a.active { background: #e8f0fe; color: #667eea; font-weight: 600; }
+        nav a.section-link { padding-left: 30px; position: relative; }
+        nav a.section-link::before { content: ''; position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 4px; height: 4px; background: #667eea; border-radius: 50%; }
+        .category { margin-bottom: 25px; }
+        .category-title { font-size: 1.1rem; font-weight: 600; color: #764ba2; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid #e0e0e0; }
+        .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .card h3 { color: #667eea; margin-bottom: 10px; font-size: 1.3rem; }
+        .card p { color: #666; margin-bottom: 15px; }
+        .card a { color: #667eea; text-decoration: none; }
+        .card a:hover { text-decoration: underline; }
+        .card-badge { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; margin-left: 10px; }
+        .content { background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .content h1 { color: #667eea; margin-bottom: 20px; font-size: 2rem; }
+        .content h2 { color: #764ba2; margin: 30px 0 15px; font-size: 1.5rem; }
+        .content h3 { color: #667eea; margin: 25px 0 10px; font-size: 1.3rem; }
+        .content ul { margin-left: 25px; }
+        .content li { margin-bottom: 8px; }
+        .content a { color: #667eea; text-decoration: none; }
+        .content a:hover { text-decoration: underline; }
+        footer { text-align: center; padding: 30px 20px; color: #666; font-size: 0.9rem; background: white; border-radius: 12px; margin-top: 30px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .tech-item { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 15px; border-radius: 8px; }
+        .tech-item strong { color: #333; display: block; margin-bottom: 5px; }
+        .tech-item a { color: #667eea; text-decoration: none; font-size: 0.9rem; }
     </style>
 </head>
 <body>
     <header>
-        <h1>SC Chatbot Documentation</h1>
-        <p>Social Commerce AI Chatbot for SMEs - Comprehensive Guide</p>
+        <h1>📚 SC Chatbot Documentation</h1>
+        <p>Complete Documentation for Social Commerce AI Chatbot Platform</p>
     </header>
     <div class="container">
-        <div class="footer-note">
-            <h3>📚 Project Documentation</h3>
+        <nav>
+            <h2>📖 Documentation Navigation</h2>
+            
+            <div class="category">
+                <div class="category-title">🏠 Quick Links</div>
+                <a href="#" class="active">Documentation Home</a>
+                <a href="architecture/overview.html">Architecture Overview</a>
+                <a href="deployment/docker.html">Deployment Guide</a>
+            </div>
+            
+            <div class="category">
+                <div class="category-title">🚀 Getting Started</div>
+                <a href="guides/getting-started.html">Getting Started</a>
+                <a href="guides/function-calling.html">Function Calling Guide</a>
+                <a href="guides/knowledge-base.html">Knowledge Base Setup</a>
+                <a href="guides/channel-integration.html">Channel Integration</a>
+                <a href="guides/multi-tenant-setup.html">Multi-Tenant Setup</a>
+                <a href="guides/e2e-testing.html">E2E Testing Guide</a>
+            </div>
+            
+            <div class="category">
+                <div class="category-title">📦 API Reference</div>
+                <a href="api-reference/mcp-server.html">MCP Server API</a>
+            </div>
+            
+            <div class="category">
+                <div class="category-title">🔧 Guides & Tutorials</div>
+                <a href="tutorials/first-steps.html">First Steps Tutorial</a>
+            </div>
+            
+            <div class="category">
+                <div class="category-title">🔒 Security & Team</div>
+                <a href="team/onboarding.html">Onboarding Guide</a>
+                <a href="team/monitoring.html">Monitoring Setup</a>
+                <a href="team/security.html">Security Best Practices</a>
+            </div>
+            
+            <div class="category">
+                <div class="category-title">🏗️ Architecture</div>
+                <a href="architecture/overview.html">Architecture Overview</a>
+                <a href="architecture/tech-reference.html">Technical Reference</a>
+            </div>
+        </nav>
+
+        <div class="content">
+            <h1>📖 Documentation Overview</h1>
+            <p>Welcome to the SC Chatbot documentation. This documentation covers everything you need to know about deploying, using, and scaling the Social Commerce AI Chatbot platform for Vietnamese SMEs.</p>
+            
+            <h2>📋 Documentation Structure</h2>
+            <p>This documentation is organized into several sections to help you find the information you need:</p>
+            
+            <h3>🎯 Getting Started</h3>
             <ul>
-                <li><a href="plan.html">📋 Comprehensive Project Plan</a> - Track progress, view all epics and tasks, learn about technology stack</li>
-                <li><a href="architecture/overview.html">🏛️ Architecture Overview</a> - System architecture, technology decisions, data flow</li>
-                <li><a href="architecture/tech-reference.html">🛠️ Technology Deep Dive</a> - Detailed explanations of every technology used</li>
-                <li><a href="deployment/docker.html">🐳 Docker & Deployment</a> - Container setup and deployment guides</li>
-                <li><a href="guides/getting-started.html">🚀 Getting Started</a> - Quick start guides for developers</li>
-                <li><a href="guides/multi-tenant-setup.html">🏢 Multi-Tenant Setup</a> - Tenant configuration and isolation</li>
-                <li><a href="guides/knowledge-base.html">📚 Knowledge Base</a> - FAQ management and document handling</li>
-                <li><a href="guides/function-calling.html">🛠️ Function Calling</a> - Tool definitions and API integrations</li>
-                <li><a href="guides/channel-integration.html">💬 Channel Integration</a> - Zalo, Facebook, Instagram guides</li>
-                <li><a href="api-reference/mcp-server.html">🔌 API Reference</a> - API endpoints and MCP server specs</li>
-                <li><a href="tutorials/first-steps.html">📝 Tutorials</a> - Step-by-step tutorials</li>
-                <li><a href="team/onboarding.html">👥 Team</a> - Onboarding and contribution guidelines</li>
-                <li><a href="team/security.html">🔒 Security</a> - Security best practices and guidelines</li>
-                <li><a href="team/monitoring.html">📊 Monitoring</a> - Monitoring and observability setup</li>
+                <li><a href="guides/getting-started.html">Getting Started</a> - Quick setup guide for new users</li>
+                <li><a href="guides/function-calling.html">Function Calling Guide</a> - How to define and use custom tools</li>
+                <li><a href="guides/knowledge-base.html">Knowledge Base Setup</a> - Upload and manage knowledge documents</li>
+                <li><a href="guides/channel-integration.html">Channel Integration</a> - Connect Zalo, Facebook, Instagram</li>
+                <li><a href="guides/multi-tenant-setup.html">Multi-Tenant Setup</a> - Configure for multiple customers</li>
+                <li><a href="guides/e2e-testing.html">E2E Testing Guide</a> - Comprehensive testing strategy for all phases</li>
             </ul>
+            
+            <h3>🏗️ Architecture</h3>
+            <ul>
+                <li><a href="architecture/overview.html">Architecture Overview</a> - High-level system architecture</li>
+                <li><a href="architecture/tech-reference.html">Technical Reference</a> - Technology stack deep dive</li>
+            </ul>
+            
+            <h3>🔧 Deployment</h3>
+            <ul>
+                <li><a href="deployment/docker.html">Docker Deployment</a> - Containerized deployment guide</li>
+                <li><a href="deployment/production.html">Production Deployment</a> - Scaling to production environment</li>
+            </ul>
+            
+            <h3>🔒 Security & Team</h3>
+            <ul>
+                <li><a href="team/security.html">Security Best Practices</a> - Security guidelines for production</li>
+                <li><a href="team/onboarding.html">Onboarding Guide</a> - Getting your team started</li>
+                <li><a href="team/monitoring.html">Monitoring Setup</a> - Setup observability and alerts</li>
+            </ul>
+            
+            <h3>📚 API Reference</h3>
+            <ul>
+                <li><a href="api-reference/mcp-server.html">MCP Server API</a> - Model Context Protocol integration</li>
+            </ul>
+            
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <strong>📖 Guides</strong>
+                    <a href="guides/getting-started.html">Getting Started</a>
+                    <br>
+                    <a href="guides/function-calling.html">Function Calling</a>
+                    <br>
+                    <a href="guides/knowledge-base.html">Knowledge Base</a>
+                    <br>
+                    <a href="guides/channel-integration.html">Channel Integration</a>
+                    <br>
+                    <a href="guides/multi-tenant-setup.html">Multi-Tenant Setup</a>
+                    <br>
+                    <a href="guides/e2e-testing.html">E2E Testing</a>
+                </div>
+                
+                <div class="tech-item">
+                    <strong>🏗️ Architecture</strong>
+                    <a href="architecture/overview.html">Architecture</a>
+                    <br>
+                    <a href="architecture/tech-reference.html">Tech Reference</a>
+                </div>
+                
+                <div class="tech-item">
+                    <strong>🔧 Deployment</strong>
+                    <a href="deployment/docker.html">Docker</a>
+                    <br>
+                    <a href="deployment/production.html">Production</a>
+                </div>
+                
+                <div class="tech-item">
+                    <strong>🔒 Security</strong>
+                    <a href="team/security.html">Security</a>
+                    <br>
+                    <a href="team/onboarding.html">Onboarding</a>
+                    <br>
+                    <a href="team/monitoring.html">Monitoring</a>
+                </div>
+                
+                <div class="tech-item">
+                    <strong>📚 API</strong>
+                    <a href="api-reference/mcp-server.html">MCP Server API</a>
+                </div>
+            </div>
         </div>
-        
-        <h2 style="color: #333; margin-bottom: 20px; text-align: center;">Quick Navigation</h2>
-        <div class="nav-grid">
-            <a href="plan.html" class="nav-card">
-                <span class="icon">📋</span>
-                <h3>Comprehensive Project Plan</h3>
-                <p>Track progress, view all epics and tasks, learn about technology stack</p>
-                <span class="badge badge-active">Active</span>
-            </a>
-            
-            <a href="architecture/overview.html" class="nav-card">
-                <span class="icon">🏛️</span>
-                <h3>Architecture Overview</h3>
-                <p>System architecture and technology stack</p>
-                <span class="badge badge-planned">Planned</span>
-            </a>
-            
-            <a href="architecture/tech-reference.html" class="nav-card">
-                <span class="icon">🛠️</span>
-                <h3>Technology Deep Dive</h3>
-                <p>Detailed explanations of every technology with code examples</p>
-                <span class="badge badge-poc">POC Ready</span>
-            </a>
-            
-            <a href="deployment/docker.html" class="nav-card">
-                <span class="icon">🐳</span>
-                <h3>Docker & Deployment</h3>
-                <p>Docker setup and deployment guides</p>
-                <span class="badge badge-poc">POC Ready</span>
-            </a>
-            
-            <a href="api-reference/mcp-server.html" class="nav-card">
-                <span class="icon">🔌</span>
-                <h3>API Reference</h3>
-                <p>API endpoints and MCP server specs</p>
-                <span class="badge badge-poc">POC Ready</span>
-            </a>
-            
-            <a href="guides/getting-started.html" class="nav-card">
-                <span class="icon">🚀</span>
-                <h3>Getting Started</h3>
-                <p>Quick start guides</p>
-                <span class="badge badge-poc">POC Ready</span>
-            </a>
-            
-            <a href="guides/multi-tenant-setup.html" class="nav-card">
-                <span class="icon">🏢</span>
-                <h3>Multi-Tenant Setup</h3>
-                <p>Tenant configuration and isolation</p>
-                <span class="badge badge-planned">Planned</span>
-            </a>
-            
-            <a href="guides/knowledge-base.html" class="nav-card">
-                <span class="icon">📚</span>
-                <h3>Knowledge Base</h3>
-                <p>FAQ management and document handling</p>
-                <span class="badge badge-planned">Planned</span>
-            </a>
-            
-            <a href="guides/function-calling.html" class="nav-card">
-                <span class="icon">🛠️</span>
-                <h3>Function Calling</h3>
-                <p>Tool definitions and API integrations</p>
-                <span class="badge badge-planned">Planned</span>
-            </a>
-            
-            <a href="guides/channel-integration.html" class="nav-card">
-                <span class="icon">💬</span>
-                <h3>Channel Integration</h3>
-                <p>Zalo, Facebook, Instagram guides</p>
-                <span class="badge badge-planned">Planned</span>
-            </a>
-            
-            <a href="tutorials/first-steps.html" class="nav-card">
-                <span class="icon">📝</span>
-                <h3>Tutorials</h3>
-                <p>Step-by-step tutorials</p>
-                <span class="badge badge-poc">POC Ready</span>
-            </a>
-            
-            <a href="team/onboarding.html" class="nav-card">
-                <span class="icon">👥</span>
-                <h3>Team</h3>
-                <p>Onboarding and contribution guidelines</p>
-                <span class="badge badge-poc">POC Ready</span>
-            </a>
-            
-            <a href="team/security.html" class="nav-card">
-                <span class="icon">🔒</span>
-                <h3>Security</h3>
-                <p>Security best practices</p>
-                <span class="badge badge-planned">Planned</span>
-            </a>
-            
-            <a href="team/monitoring.html" class="nav-card">
-                <span class="icon">📊</span>
-                <h3>Monitoring</h3>
-                <p>Monitoring and observability</p>
-                <span class="badge badge-planned">Planned</span>
-            </a>
-        </div>
+
+        <footer>
+            <p><strong>SC Chatbot Documentation</strong> | Last Updated: May 2026 | Version 1.0</p>
+            <p>© 2026 SC Chatbot. All rights reserved.</p>
+        </footer>
     </div>
-    <footer>
-        <p>SC Chatbot Documentation &copy; 2026 | POC Phase</p>
-    </footer>
 </body>
 </html>

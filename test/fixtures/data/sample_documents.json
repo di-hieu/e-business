@@ -1,0 +1,38 @@
+[
+  {
+    "id": "doc1",
+    "title": "Returns Policy",
+    "content": "We offer a 30-day return policy for all products. Items must be in original condition with tags attached.",
+    "category": "returns"
+  },
+  {
+    "id": "doc2",
+    "title": "Shipping Info",
+    "content": "Standard shipping takes 3-5 business days. Express shipping takes 1-2 business days.",
+    "category": "shipping"
+  },
+  {
+    "id": "doc3",
+    "title": "Product Care",
+    "content": "Wash clothes separately in cold water. Do not bleach. Tumble dry low.",
+    "category": "care"
+  },
+  {
+    "id": "doc4",
+    "title": "Order Tracking",
+    "content": "You can track your order using the tracking number provided in your shipping confirmation email.",
+    "category": "tracking"
+  },
+  {
+    "id": "doc5",
+    "title": "Payment Methods",
+    "content": "We accept Visa, MasterCard, PayPal, and bank transfers. Credit card processing fees are passed to customers.",
+    "category": "payment"
+  },
+  {
+    "id": "doc6",
+    "title": "Warranty Information",
+    "content": "All products come with a 1-year warranty covering manufacturing defects. Warranty claims must be submitted within 90 days of purchase.",
+    "category": "warranty"
+  }
+]
