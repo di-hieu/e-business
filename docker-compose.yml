@@ -1,0 +1,77 @@
+# SC Chatbot Docker Compose - POC Phase
+# This file defines the full stack for POC deployment
+
+version: '3.8'
+
+services:
+  # Backend API service
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///./data/app.db
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-secret-key-change-in-production}
+      - LLM_API_KEY=${LLM_API_KEY:-}
+      - EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+      - FAISS_DIR=./data/faiss
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      - vectorstore
+
+  # Vector store (FAISS directory mounted as volume)
+  vectorstore:
+    image: python:3.11-slim
+    volumes:
+      - ./data:/data
+    # FAISS will be stored in ./data/faiss/
+
+  # Frontend development server
+  frontend:
+    image: node:18-alpine
+    ports:
+      - "3000:3000"
+    working_dir: /app
+    volumes:
+      - ./src/frontend:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0
+    environment:
+      - VITE_API_URL=http://localhost:8000
+
+  # PostgreSQL (for production, optional for POC)
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=sc_chatbot
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  # Redis (for production caching, optional for POC)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  # FAISS data will be in ./data/faiss/

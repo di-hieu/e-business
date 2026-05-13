@@ -1,0 +1,135 @@
+FAQ - SC Chatbot Knowledge Base
+================================
+
+Q: What is SC Chatbot?
+A: SC Chatbot is an AI-powered customer support chatbot for SMEs. It uses RAG (Retrieval-Augmented Generation) to provide accurate, context-aware responses based on your business knowledge.
+
+Q: How do I integrate SC Chatbot with Zalo?
+A: Follow these steps:
+1. Register at Zalo Developer Portal
+2. Create a Zalo Official Account
+3. Configure webhook endpoint
+4. Add credentials to .env file
+5. Test end-to-end flow
+
+Q: What channels are supported?
+A: Currently supported:
+- Zalo Official Account (primary for Vietnam market)
+- Facebook Messenger (coming in MVP)
+- Instagram Direct (production phase)
+
+Q: How do I upload knowledge documents?
+A: Go to Knowledge page in admin dashboard and:
+1. Click "Upload Document"
+2. Select file (PDF, DOCX, TXT) or paste text
+3. Click "Upload"
+4. Wait for processing (document will be chunked and embedded)
+
+Q: How do I define custom tools?
+A: Go to Settings → Tools and:
+1. Click "Add New Tool"
+2. Enter tool name and description
+3. Provide JSON Schema for parameters
+4. Set endpoint URL and HTTP method
+5. Click "Save"
+
+Q: What information does SC Chatbot need?
+A: To respond accurately, provide:
+- Company/product information
+- FAQ documents
+- Product catalog
+- Policy documents
+- Pricing information
+
+Q: How do I track an order?
+A: Use the track_order tool:
+1. Define the tool in Settings
+2. Provide order number parameter
+3. Chatbot will call your order tracking endpoint
+4. Return tracking status to user
+
+Q: What is RAG?
+A: RAG (Retrieval-Augmented Generation) combines vector search with LLMs. It retrieves relevant documents from your knowledge base and uses them to generate accurate responses.
+
+Q: How accurate is the chatbot?
+A: Accuracy depends on:
+- Quality of uploaded documents
+- Relevance of queries to knowledge
+- Embedding model quality (all-MiniLM-L6-v2 for POC)
+
+Q: Can I use my own LLM?
+A: Yes! Configure LLM_API_KEY in .env:
+- OpenAI: gpt-4o-mini, gpt-4o
+- OpenRouter: multiple models supported
+- Local: Ollama models (future upgrade)
+
+Q: How do I set up Zalo webhook?
+A: 1. Go to Zalo OA console
+2. Create webhook
+3. Add webhook URL: https://your-domain.com/webhooks/zalo
+4. Copy app ID and secret to .env
+5. Test webhook delivery
+
+Q: What data is stored?
+A: SC Chatbot stores:
+- Tenant data (isolated per tenant)
+- Conversation history
+- Uploaded knowledge documents
+- Tool definitions
+- Usage analytics
+
+Q: Is my data secure?
+A: Yes! We implement:
+- JWT authentication
+- RBAC (role-based access control)
+- Tenant isolation
+- Secure webhook signatures
+- Regular security audits
+
+Q: How do I upgrade to production?
+A: Upgrade path:
+1. Replace SQLite with PostgreSQL
+2. Replace FAISS with Qdrant
+3. Add Redis for caching
+4. Migrate to GPT-4o or Claude
+5. Deploy to AWS/Azure
+
+Q: What are the system requirements?
+A: For POC:
+- 2 CPU cores
+- 4GB RAM
+- 10GB disk space
+For production:
+- 8+ CPU cores
+- 16GB+ RAM
+- 50GB+ disk space
+
+Q: Can I deploy on-premises?
+A: Yes! SC Chatbot supports:
+- Docker deployment (recommended)
+- On-premises deployment (MVP)
+- .deb/.rpm packages (MVP)
+
+Q: What is the pricing model?
+A: POC is free for testing.
+Production pricing:
+- Usage-based (tokens + messages)
+- Subscription plans
+- Contact us for enterprise quotes
+
+Q: How do I get API access?
+A: After tenant registration, you'll receive:
+- Tenant API key
+- Admin credentials
+- Documentation links
+
+Q: What if the chatbot doesn't understand?
+A: If the chatbot struggles:
+1. Add relevant documents to knowledge base
+2. Refine tool definitions
+3. Check LLM configuration
+4. Review conversation logs in admin panel
+
+================================
+END OF FAQ
+================================
