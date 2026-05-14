@@ -1,19 +1,8 @@
-# Dependency Directories
-/node_modules
-/vendor
-/venv
-
-# Build Artifacts
-/frontend/build
-/dist
-*.log
-
-# Operating System Files
-.DS_Store
-Thumbs.db
-
-# Local Configuration & Environment
 .env
-.vscode/
-/systemd/
+.venv/
 __pycache__/
+*.pyc
+data/
+.idea/
+.vscode/
+.claude/
