@@ -10,8 +10,8 @@ from datetime import datetime
 import uuid
 import shutil
 
-# Add src to path
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+# Add project root to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.backend import models
 from src.backend.config import settings

@@ -1,173 +1,248 @@
 """
 SC Chatbot Knowledge Endpoints
 
-Knowledge base management API endpoints.
+Knowledge management API endpoints for uploading, storing, and managing
+FAQs, product documentation, and policies.
 """
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
-from pydantic import BaseModel
-from typing import List, Optional
-from datetime import datetime
+import sys
+import os
 
-from ..models.knowledge import KnowledgeDocument
-from ..models.database import get_db_session
+# Add backend root to path for absolute imports
+backend_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if backend_root not in sys.path:
+    sys.path.insert(0, backend_root)
+
+from fastapi import APIRouter, HTTPException, Depends, Request, UploadFile, File, Form
+from pydantic import BaseModel
+from typing import Optional
+import hashlib
+
+import models.database as db_model
+import services.auth_service as auth_service
+import models.knowledge as knowledge_model
+import models.tenant as tenant_model
 
 router = APIRouter(prefix="/knowledge", tags=["Knowledge"])
 
 
-class KnowledgeDocumentResponse(BaseModel):
-    """Knowledge document response model."""
-    id: int
-    original_filename: str
-    content_type: str
-    file_size: int
-    is_processed: bool
-    is_active: bool
-    uploaded_at: str
+def get_current_user(request: Request):
+    """Get current user from token."""
+    token = auth_service.verify_token_from_header(request)
+    if not token:
+        raise HTTPException(status_code=401, detail="Invalid or missing token")
+    
+    return auth_service.verify_token(token)
 
 
-class KnowledgeListResponse(BaseModel):
-    """Knowledge list response model."""
-    documents: List[KnowledgeDocumentResponse]
-    count: int
+class KnowledgeUploadRequest(BaseModel):
+    """Knowledge upload request model."""
+    content: str
+    title: Optional[str] = None
+    tenant_key: str
 
 
-@router.post("/upload", response_model=KnowledgeDocumentResponse)
+@router.post("/upload", response_model=dict)
 async def upload_knowledge(
-    file: UploadFile = File(...),
-    tenant_key: str = Form(...),
-    api_key: str = Form(...),
-    is_active: bool = Form(True),
+    file: Optional[UploadFile] = File(None),
+    content: Optional[str] = Form(None),
+    title: Optional[str] = Form(None),
+    request: Request = None,
 ):
-    """Upload a knowledge document."""
+    """
+    Upload knowledge document or content.
     
-    # Verify credentials
-    if not tenant_key or not api_key:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+    Supports PDF, DOCX, TXT files, or plain text content.
+    """
+    token = auth_service.verify_token_from_header(request)
+    if not token:
+        raise HTTPException(status_code=401, detail="Invalid or missing token")
     
-    async with get_db_session() as session:
-        # Get tenant
-        tenant = session.query(KnowledgeDocument).filter(
-            KnowledgeDocument.tenant_key == tenant_key,
+    user_info = auth_service.verify_token(token)
+    
+    # Get tenant
+    async with db_model.get_db_session() as session:
+        tenant = session.query("tenants").filter(
+            "tenants.tenant_key = ?",
+            [user_info.get("tenant_key")],
         ).first()
         
         if not tenant:
             raise HTTPException(status_code=404, detail="Tenant not found")
         
-        # Read file
-        content = file.file.read()
-        content_type = file.content_type
+        # Handle file upload
+        if file:
+            filename = file.filename or f"document_{hashlib.md5(str(file.file).encode()).hexdigest()[:8]}.txt"
+            
+            # Store file content
+            content = await file.read()
+            content_text = content.decode("utf-8", errors="ignore")
+            
+            # Get existing knowledge or create new
+            existing = session.query("knowledge").filter(
+                "knowledge.tenant_id = ?",
+                [tenant.id],
+            ).first()
+            
+            if existing:
+                # Update existing
+                existing.content = content_text
+                existing.title = title or existing.title
+                existing.file_name = filename
+            else:
+                # Create new
+                knowledge = knowledge_model.Knowledge(
+                    tenant_id=tenant.id,
+                    content=content_text,
+                    title=title or f"Uploaded Knowledge",
+                    file_name=filename,
+                )
+                session.add(knowledge)
+            
+            session.commit()
+            
+            return {
+                "status": "success",
+                "message": "Knowledge uploaded successfully",
+                "knowledge_id": knowledge.id if knowledge else existing.id,
+                "file_name": filename,
+            }
         
-        # Create document
-        doc = KnowledgeDocument(
-            tenant_id=tenant.id,
-            original_filename=file.filename,
-            content_type=content_type,
-            file_size=len(content),
-            parsed_content="",  # Would be parsed here
-            is_active=is_active,
-        )
-        
-        session.add(doc)
-        session.commit()
+        # Handle plain text content
+        if content:
+            existing = session.query("knowledge").filter(
+                "knowledge.tenant_id = ?",
+                [tenant.id],
+            ).first()
+            
+            if existing:
+                existing.content = content
+                existing.title = title or existing.title
+            else:
+                knowledge = knowledge_model.Knowledge(
+                    tenant_id=tenant.id,
+                    content=content,
+                    title=title or "Text Content",
+                )
+                session.add(knowledge)
+            
+            session.commit()
+            
+            return {
+                "status": "success",
+                "message": "Knowledge saved successfully",
+                "knowledge_id": knowledge.id if knowledge else existing.id,
+            }
         
         return {
-            "id": doc.id,
-            "original_filename": doc.original_filename,
-            "content_type": doc.content_type,
-            "file_size": doc.file_size,
-            "is_processed": False,
-            "is_active": doc.is_active,
-            "uploaded_at": doc.uploaded_at,
+            "status": "error",
+            "message": "No content or file provided",
         }
 
 
-@router.get("/list", response_model=KnowledgeListResponse)
-async def list_knowledge(
-    tenant_key: str,
-    api_key: str,
+@router.post("/update", response_model=dict)
+async def update_knowledge(
+    content: str = Form(...),
+    title: Optional[str] = Form(None),
+    knowledge_id: str = Form(None),
+    request: Request = None,
 ):
-    """List all knowledge documents for tenant."""
+    """
+    Update existing knowledge content.
+    """
+    token = auth_service.verify_token_from_header(request)
+    if not token:
+        raise HTTPException(status_code=401, detail="Invalid or missing token")
     
-    # Verify credentials
-    if not tenant_key or not api_key:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+    user_info = auth_service.verify_token(token)
     
-    async with get_db_session() as session:
-        documents = session.query(KnowledgeDocument).filter(
-            KnowledgeDocument.tenant_id == tenant_key,
+    async with db_model.get_db_session() as session:
+        knowledge = session.query("knowledge").filter(
+            "knowledge.id = ?",
+            [knowledge_id],
+        ).first()
+        
+        if not knowledge:
+            raise HTTPException(status_code=404, detail="Knowledge not found")
+        
+        knowledge.content = content
+        knowledge.title = title or knowledge.title
+        
+        session.commit()
+        
+        return {
+            "status": "success",
+            "message": "Knowledge updated successfully",
+        }
+
+
+@router.post("/delete", response_model=dict)
+async def delete_knowledge(
+    knowledge_id: str = Form(...),
+    request: Request = None,
+):
+    """
+    Delete knowledge document.
+    """
+    token = auth_service.verify_token_from_header(request)
+    if not token:
+        raise HTTPException(status_code=401, detail="Invalid or missing token")
+    
+    user_info = auth_service.verify_token(token)
+    
+    async with db_model.get_db_session() as session:
+        knowledge = session.query("knowledge").filter(
+            "knowledge.id = ?",
+            [knowledge_id],
+        ).first()
+        
+        if not knowledge:
+            raise HTTPException(status_code=404, detail="Knowledge not found")
+        
+        session.delete(knowledge)
+        session.commit()
+        
+        return {
+            "status": "success",
+            "message": "Knowledge deleted successfully",
+        }
+
+
+@router.get("/list", response_model=dict)
+async def list_knowledge(
+    request: Request = None,
+):
+    """
+    List all knowledge for the tenant.
+    """
+    token = auth_service.verify_token_from_header(request)
+    if not token:
+        raise HTTPException(status_code=401, detail="Invalid or missing token")
+    
+    user_info = auth_service.verify_token(token)
+    
+    async with db_model.get_db_session() as session:
+        tenant = session.query("tenants").filter(
+            "tenants.tenant_key = ?",
+            [user_info.get("tenant_key")],
+        ).first()
+        
+        if not tenant:
+            raise HTTPException(status_code=404, detail="Tenant not found")
+        
+        knowledge_items = session.query("knowledge").filter(
+            "knowledge.tenant_id = ?",
+            [tenant.id],
         ).all()
         
         return {
-            "documents": [
+            "knowledge": [
                 {
-                    "id": doc.id,
-                    "original_filename": doc.original_filename,
-                    "content_type": doc.content_type,
-                    "file_size": doc.file_size,
-                    "is_processed": doc.is_processed,
-                    "is_active": doc.is_active,
-                    "uploaded_at": doc.uploaded_at,
+                    "id": k.id,
+                    "title": k.title,
+                    "file_name": k.file_name,
+                    "created_at": k.created_at,
                 }
-                for doc in documents
-            ],
-            "count": len(documents),
-        }
-
-
-@router.delete("/{doc_id}")
-async def delete_knowledge(
-    doc_id: int,
-    tenant_key: str,
-    api_key: str,
-):
-    """Delete a knowledge document."""
-    
-    # Verify credentials
-    if not tenant_key or not api_key:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-    async with get_db_session() as session:
-        doc = session.query(KnowledgeDocument).filter(
-            KnowledgeDocument.id == doc_id,
-            KnowledgeDocument.tenant_id == tenant_key,
-        ).first()
-        
-        if not doc:
-            raise HTTPException(status_code=404, detail="Document not found")
-        
-        session.delete(doc)
-        session.commit()
-        
-        return {"success": True, "message": "Document deleted"}
-
-
-@router.put("/{doc_id}/active")
-async def toggle_knowledge_active(
-    doc_id: int,
-    is_active: bool,
-    tenant_key: str,
-    api_key: str,
-):
-    """Toggle document active status."""
-    
-    # Verify credentials
-    if not tenant_key or not api_key:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-    async with get_db_session() as session:
-        doc = session.query(KnowledgeDocument).filter(
-            KnowledgeDocument.id == doc_id,
-            KnowledgeDocument.tenant_id == tenant_key,
-        ).first()
-        
-        if not doc:
-            raise HTTPException(status_code=404, detail="Document not found")
-        
-        doc.is_active = is_active
-        session.commit()
-        
-        return {
-            "success": True,
-            "is_active": doc.is_active,
+                for k in knowledge_items
+            ]
         }

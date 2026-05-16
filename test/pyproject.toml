@@ -3,47 +3,37 @@
 # Test Configuration for SC Chatbot
 # Run with: pytest test/ -v --cov=src/backend
 
-[pytest]
-minversion = 8.0
-addopts = -ra --strict-markers --tb=short
-testpaths =
-    test
-    src/backend
+minversion = "8.0"
 
 # Markers for test organization
-markers =
-    slow: marks tests as slow (deselect with '-m "not slow"')
-    integration: marks tests as integration tests
-    e2e: marks tests as end-to-end browser tests
-    channel: marks tests related to channel integrations
-    rag: marks tests for RAG functionality
-    tools: marks tests for function calling
-    tenant: marks tests for multi-tenancy
-    admin: marks tests for admin dashboard
-    load: marks load/performance tests
-    security: marks security tests
-    compliance: marks compliance tests
-    skip_on_error: skip following tests on error
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "e2e: marks tests as end-to-end browser tests",
+    "channel: marks tests related to channel integrations",
+    "rag: marks tests for RAG functionality",
+    "tools: marks tests for function calling",
+    "tenant: marks tests for multi-tenancy",
+    "admin: marks tests for admin dashboard",
+    "load: marks load/performance tests",
+    "security: marks security tests",
+    "compliance: marks compliance tests",
+    "skip_on_error: skip following tests on error",
+]
 
 # Python paths
-pythonpath = src/backend
+pythonpath = ["src/backend"]
 
 # Logging configuration
 log_cli = true
-log_cli_level = INFO
-log_cli_format = %(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)
-log_cli_date_format = %Y-%m-%d %H:%M:%S
-
-# Coverage settings
-addopts = --cov=src/backend --cov-report=html --cov-report=term-missing
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 
 # Test discovery
-python_files = test_*.py
-python_functions = test_*
-python_classes = Test*
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+python_classes = ["Test*"]
 
 # asyncio mode
-asyncio_mode = auto
-
-# UI report
-addopts = --ui
+asyncio_mode = "auto"

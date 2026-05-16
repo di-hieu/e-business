@@ -1,42 +1,73 @@
 """
-SC Chatbot - Configuration API Implementation
+SC Chatbot Configuration API
 
 This module provides endpoints for configuring the chatbot system
-through the web UI, allowing dynamic configuration changes without
-restarting the server.
+through the web UI.
 """
 
-from fastapi import APIRouter, HTTPException, Query, Depends, Request
-from typing import Dict, Optional
-import os
-import json
+from fastapi import APIRouter, HTTPException, Query, Request
+from typing import Dict
 
 # Initialize router
 config_router = APIRouter(prefix="/config", tags=["Configuration"])
 
 
-def get_config_file_path() -> Optional[str]:
-    """Get path to configuration file (.env or config.json)"""
+def get_config_defaults() -> Dict[str, str]:
+    """Get default configuration keys and descriptions."""
+    return {
+        "TELEGRAM_BOT_TOKEN": "Telegram Bot token (required for Telegram integration)",
+        "TELEGRAM_WEBHOOK_URL": "Telegram webhook URL (for production use)",
+        "ZALO_APP_ID": "Zalo Official Account app ID",
+        "ZALO_APP_SECRET": "Zalo Official Account app secret",
+        "ZALO_REDIRECT_URI": "Zalo OAuth redirect URI",
+        "FACEBOOK_APP_ID": "Facebook app ID",
+        "FACEBOOK_APP_SECRET": "Facebook app secret",
+        "INSTAGRAM_ACCESS_TOKEN": "Instagram access token",
+        "WECHAT_APP_ID": "WeChat app ID",
+        "WECHAT_APP_SECRET": "WeChat app secret",
+        "LLM_API_KEY": "LLM API key (OpenAI/OpenRouter)",
+        "LLM_MODEL": "LLM model name",
+        "LLM_TEMPERATURE": "LLM temperature (0.0-2.0)",
+        "LLM_MAX_TOKENS": "Maximum tokens for response",
+        "JWT_SECRET_KEY": "JWT secret key for authentication",
+        "JWT_EXPIRY_MINUTES": "JWT token expiry in minutes",
+        "SESSION_TIMEOUT_MINUTES": "Session timeout in minutes",
+        "RAG_TOP_K": "Number of top documents to retrieve",
+        "RAG_SIMILARITY_THRESHOLD": "Similarity threshold for RAG",
+    }
+
+
+def get_config_file_path() -> str:
+    """Get path to configuration file (.env)"""
+    import os
+    
+    # Try multiple possible paths
     possible_paths = [
         os.path.join(os.path.dirname(__file__), "../../.env"),
         os.path.join(os.path.dirname(__file__), ".env"),
-        os.path.join(os.path.dirname(__file__), ".env.config"),
-        "/etc/e-business/config.json",
-        "/opt/e-business/config.json",
     ]
     
     for path in possible_paths:
-        if os.path.exists(path):
-            return path
+        env_path = os.path.join(path, ".env") if path.endswith("/") else path
+        if os.path.exists(env_path):
+            return env_path
     
-    return None
+    # Fallback: return current working directory .env
+    env_path = os.path.join(os.getcwd(), ".env")
+    if os.path.exists(env_path):
+        return env_path
+    
+    return ""
 
 
 def load_config_from_env() -> Dict[str, str]:
-    """Load configuration from .env file"""
+    """Load configuration from .env file."""
+    import os
+    
     config = {}
     
     try:
+        import dotenv
         from dotenv import find_dotenv, load_dotenv
         
         env_path = find_dotenv()
@@ -46,9 +77,14 @@ def load_config_from_env() -> Dict[str, str]:
                 key: os.environ.get(key, "")
                 for key in get_config_keys()
             }
+    except ImportError:
+        # If dotenv not available, just read from environment
+        config = {
+            key: os.environ.get(key, "")
+            for key in get_config_keys()
+        }
     except Exception as e:
         print(f"Failed to load .env file: {str(e)}")
-        # Fall back to current environment variables
         config = {
             key: os.environ.get(key, "")
             for key in get_config_keys()
@@ -82,36 +118,6 @@ def get_config_keys() -> list:
     ]
 
 
-def get_config_defaults() -> Dict[str, str]:
-    """
-    Get default configuration keys and descriptions.
-    
-    Returns:
-        Dictionary of config keys to their descriptions
-    """
-    return {
-        "TELEGRAM_BOT_TOKEN": "Telegram Bot token (required for Telegram integration)",
-        "TELEGRAM_WEBHOOK_URL": "Telegram webhook URL (for production use)",
-        "ZALO_APP_ID": "Zalo Official Account app ID",
-        "ZALO_APP_SECRET": "Zalo Official Account app secret",
-        "ZALO_REDIRECT_URI": "Zalo OAuth redirect URI",
-        "FACEBOOK_APP_ID": "Facebook app ID",
-        "FACEBOOK_APP_SECRET": "Facebook app secret",
-        "INSTAGRAM_ACCESS_TOKEN": "Instagram access token",
-        "WECHAT_APP_ID": "WeChat app ID",
-        "WECHAT_APP_SECRET": "WeChat app secret",
-        "LLM_API_KEY": "LLM API key (OpenAI/OpenRouter)",
-        "LLM_MODEL": "LLM model name",
-        "LLM_TEMPERATURE": "LLM temperature (0.0-2.0)",
-        "LLM_MAX_TOKENS": "Maximum tokens for response",
-        "JWT_SECRET_KEY": "JWT secret key for authentication",
-        "JWT_EXPIRY_MINUTES": "JWT token expiry in minutes",
-        "SESSION_TIMEOUT_MINUTES": "Session timeout in minutes",
-        "RAG_TOP_K": "Number of top documents to retrieve",
-        "RAG_SIMILARITY_THRESHOLD": "Similarity threshold for RAG",
-    }
-
-
 @config_router.get("/defaults", response_model=Dict[str, str])
 async def get_config_defaults_endpoint():
     """
@@ -122,8 +128,7 @@ async def get_config_defaults_endpoint():
     """
     return {
         "description": key,
-        "default": value or ""
-        for key, value in get_config_defaults().items()
+        "default": value or "",
     }
 
 

@@ -65,9 +65,9 @@ export const authAPI = {
 
 // Chat API
 export const chatAPI = {
-  sendMessage: (data) => api.post('/chat/message', data),
-  getConversations: (userId) => api.get('/chat/conversations', { params: { userId } }),
-  getConversation: (conversationId) => api.get(`/chat/conversations/${conversationId}`),
+  sendMessage: (data) => api.post('/api/chat/message', data),
+  getConversations: (userId) => api.get('/api/chat/conversations', { params: { userId } }),
+  getConversation: (conversationId) => api.get(`/api/chat/conversations/${conversationId}`),
 }
 
 // Knowledge API
@@ -77,35 +77,35 @@ export const knowledgeAPI = {
     formData.append('file', file)
     formData.append('tenant_key', tenantKey)
     formData.append('api_key', apiKey)
-    return api.post('/knowledge/upload', formData, {
+    return api.post('/api/knowledge/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
   },
   list: (tenantKey, apiKey) =>
-    api.get('/knowledge/list', {
+    api.get('/api/knowledge/list', {
       params: { tenant_key: tenantKey, api_key: apiKey },
     }),
   delete: (docId, tenantKey, apiKey) =>
-    api.delete(`/knowledge/${docId}`, {
+    api.delete(`/api/knowledge/${docId}`, {
       params: { tenant_key: tenantKey, api_key: apiKey },
     }),
   toggle: (docId, is_active, tenantKey, apiKey) =>
-    api.put(`/knowledge/${docId}/active`, { is_active, tenant_key: tenantKey, api_key: apiKey }),
+    api.put(`/api/knowledge/${docId}/active`, { is_active, tenant_key: tenantKey, api_key: apiKey }),
 }
 
 // Tools API
 export const toolsAPI = {
   list: (tenantKey, apiKey) =>
-    api.get('/tools/definitions', {
+    api.get('/api/tools', {
       params: { tenant_key: tenantKey, api_key: apiKey },
     }),
   execute: (toolName, params, tenantKey, apiKey) =>
-    api.post('/tools/execute', { tool_name: toolName, parameters: params }, {
+    api.post('/api/tools/register', { tool_name: toolName, parameters: params }, {
       params: { tenant_key: tenantKey, api_key: apiKey },
     }),
-  define: (toolData) => api.post('/tools/define', toolData),
+  define: (toolData) => api.post('/api/tools/register', toolData),
   delete: (toolId, tenantKey, apiKey) =>
-    api.delete(`/tools/${toolId}`, {
+    api.delete(`/api/tools/${toolId}`, {
       params: { tenant_key: tenantKey, api_key: apiKey },
     }),
 }
@@ -113,40 +113,61 @@ export const toolsAPI = {
 // Admin API
 export const adminAPI = {
   analytics: (tenantKey, apiKey) =>
-    api.get('/admin/analytics', {
+    api.get('/api/admin/analytics', {
       params: { tenant_key: tenantKey, api_key: apiKey },
     }),
   users: (tenantKey, apiKey) =>
-    api.get('/admin/users', {
+    api.get('/api/admin/users', {
+      params: { tenant_key: tenantKey, api_key: apiKey },
+    }),
+  tenants: (tenantKey, apiKey) =>
+    api.get('/api/admin/tenants', {
       params: { tenant_key: tenantKey, api_key: apiKey },
     }),
   documents: (tenantKey, apiKey) =>
-    api.get('/admin/documents', {
+    api.get('/api/admin/documents', {
       params: { tenant_key: tenantKey, api_key: apiKey },
     }),
   tools: (tenantKey, apiKey) =>
-    api.get('/admin/tools', {
+    api.get('/api/admin/tools', {
       params: { tenant_key: tenantKey, api_key: apiKey },
     }),
   conversations: (tenantKey, apiKey) =>
-    api.get('/admin/conversations', {
+    api.get('/api/admin/conversations', {
       params: { tenant_key: tenantKey, api_key: apiKey },
     }),
   settings: (tenantKey, apiKey) =>
-    api.get('/admin/settings', {
+    api.get('/api/admin/settings', {
       params: { tenant_key: tenantKey, api_key: apiKey },
     }),
   updateSettings: (data, tenantKey, apiKey) =>
-    api.post('/admin/settings', data, {
+    api.post('/api/admin/settings', data, {
+      params: { tenant_key: tenantKey, api_key: apiKey },
+    }),
+  configVariables: (tenantKey, apiKey) =>
+    api.get('/api/config/variables', {
+      params: { tenant_key: tenantKey, api_key: apiKey },
+    }),
+  updateConfigVariables: (data, tenantKey, apiKey) =>
+    api.post('/api/config/variables', data, {
+      params: { tenant_key: tenantKey, api_key: apiKey },
+    }),
+  configDefaults: (tenantKey, apiKey) =>
+    api.get('/api/config/defaults', {
+      params: { tenant_key: tenantKey, api_key: apiKey },
+    }),
+  configStatus: (tenantKey, apiKey) =>
+    api.get('/api/config/status', {
       params: { tenant_key: tenantKey, api_key: apiKey },
     }),
 }
 
 // Webhooks API (for testing)
 export const webhookAPI = {
-  testZalo: (payload) => api.post('/webhooks/zalo', payload),
-  testFacebook: (payload) => api.post('/webhooks/facebook', payload),
-  testInstagram: (payload) => api.post('/webhooks/instagram', payload),
+  testZalo: (payload) => api.post('/api/webhooks/zalo', payload),
+  testFacebook: (payload) => api.post('/api/webhooks/facebook', payload),
+  testInstagram: (payload) => api.post('/api/webhooks/instagram', payload),
 }
 
+export { api }
 export default api

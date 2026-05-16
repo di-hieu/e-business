@@ -4,6 +4,14 @@ Supports Zalo, Facebook, Instagram, and Telegram integrations
 Configuration is loaded from UI via /config/variables API
 """
 
+# Add backend to sys.path for absolute imports
+import sys
+import os
+
+backend_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if backend_root not in sys.path:
+    sys.path.insert(0, backend_root)
+
 from fastapi import APIRouter, HTTPException, Request, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 import hmac
@@ -11,14 +19,11 @@ import hashlib
 import json
 from datetime import datetime
 from typing import Optional, Any
-from ..services.config_service import get_config_value, get_config_from_api
-from fastapi import HTTPException
-
-from ..models.database import get_db_session
-from ..services.auth_service import AuthService
-from ..models.conversation import Conversation
-from ..models.message import Message
-from ..rag.pipeline import RAGPipeline
+import services.config_service as config_service
+import services.auth_service as auth_service
+import models.conversation as conversation_model
+import models.message as message_model
+import rag.pipeline as rag_pipeline
 
 # Initialize router
 router = APIRouter(prefix="/webhooks", tags=["Webhooks"])
@@ -33,13 +38,13 @@ class TelegramWebhook:
     """Telegram webhook handler class - configuration loaded from UI"""
     
     def __init__(self, bot_token: Optional[str] = None):
-        self.bot_token = bot_token or get_config_value("TELEGRAM_BOT_TOKEN", "")
+        self.bot_token = bot_token or config_service.get_config_value("TELEGRAM_BOT_TOKEN", "")
         self._api_url = "https://api.telegram.org/bot" + self.bot_token
     
     @property
     def webhook_url(self) -> str:
         """Get webhook URL from config"""
-        return get_config_value("TELEGRAM_WEBHOOK_URL", "")
+        return config_service.get_config_value("TELEGRAM_WEBHOOK_URL", "")
     
     def verify_signature(self, update: dict) -> bool:
         """Verify webhook signature (if provided)"""
@@ -73,17 +78,16 @@ class TelegramWebhook:
             bot_token = self.bot_token or request.query_params.get("bot_token")
             
             # Verify token (if configured)
-            token = AuthService.verify_token_from_header(request)
+            token = auth_service.verify_token_from_header(request)
             if not token:
                 raise HTTPException(status_code=401, detail="Invalid or missing token")
             
-            user_info = AuthService.verify_token(token)
+            user_info = auth_service.verify_token(token)
             if not user_info:
                 raise HTTPException(status_code=401, detail="Invalid user token")
             
-            # Get or create tenant from user info
-            async with get_db_session() as session:
-                # Find tenant for this user (or create default)
+            # Get or create conversation
+            async with conversation_model.get_db_session() as session:
                 tenant = session.query("tenants").filter(
                     "tenants.tenant_key IN (?)",
                     [user_info.get("tenant_key")]
@@ -92,8 +96,7 @@ class TelegramWebhook:
                 if not tenant:
                     raise HTTPException(status_code=404, detail="Tenant not found")
             
-            # Create or get conversation
-            conversation = await get_or_create_conversation(
+            conversation = await conversation_model.get_or_create_conversation(
                 session=session,
                 user_id=str(user_info["sub"]),
                 tenant_id=tenant.id,
@@ -101,7 +104,7 @@ class TelegramWebhook:
             )
             
             # Store user message
-            user_message = Message(
+            user_message = message_model.Message(
                 conversation_id=conversation.id,
                 role="user",
                 content=text,
@@ -110,11 +113,11 @@ class TelegramWebhook:
             session.commit()
             
             # Process with RAG pipeline
-            rag_pipeline = RAGPipeline(tenant_id=tenant.id)
-            response = await rag_pipeline.generate_response(text)
+            rag = rag_pipeline.RAGPipeline(tenant_id=tenant.id)
+            response = await rag.generate_response(text)
             
             # Create assistant message
-            assistant_message = Message(
+            assistant_message = message_model.Message(
                 conversation_id=conversation.id,
                 role="assistant",
                 content=response,
@@ -175,12 +178,12 @@ class TelegramWebhook:
                 return True
             
             # Verify token
-            token = AuthService.verify_token_from_header(request)
+            token = auth_service.verify_token_from_header(request)
             if not token:
                 raise HTTPException(status_code=401, detail="Invalid or missing token")
             
             # Get user info
-            user_info = AuthService.verify_token(token)
+            user_info = auth_service.verify_token(token)
             
             # Store file metadata (actual file processing in background task)
             # ... file processing logic ...
@@ -205,8 +208,8 @@ class WechatWebhook:
     """WeChat Official Account webhook handler"""
     
     def __init__(self, appid: str = "", appsecret: str = ""):
-        self.appid = appid or get_config_value("WECHAT_APP_ID", "")
-        self.appsecret = appsecret or get_config_value("WECHAT_APP_SECRET", "")
+        self.appid = appid or config_service.get_config_value("WECHAT_APP_ID", "")
+        self.appsecret = appsecret or config_service.get_config_value("WECHAT_APP_SECRET", "")
         self.session_id = None
         self.user_openid = None
     
@@ -245,8 +248,8 @@ class FacebookWebhook:
     """Facebook webhook handler"""
     
     def __init__(self, app_id: str = "", app_secret: str = ""):
-        self.app_id = app_id or get_config_value("FACEBOOK_APP_ID", "")
-        self.app_secret = app_secret or get_config_value("FACEBOOK_APP_SECRET", "")
+        self.app_id = app_id or config_service.get_config_value("FACEBOOK_APP_ID", "")
+        self.app_secret = app_secret or config_service.get_config_value("FACEBOOK_APP_SECRET", "")
     
     async def handle_page_message(self, request: Request):
         """Handle Facebook page message"""
@@ -279,7 +282,7 @@ class InstagramWebhook:
     """Instagram webhook handler"""
     
     def __init__(self, access_token: str = ""):
-        self.access_token = access_token or get_config_value("INSTAGRAM_ACCESS_TOKEN", "")
+        self.access_token = access_token or config_service.get_config_value("INSTAGRAM_ACCESS_TOKEN", "")
     
     async def handle_message(self, request: Request):
         """Handle Instagram message"""
@@ -595,6 +598,14 @@ async def zalo_webhook_endpoint(
             status_code=500,
             content={"ok": False, "error": str(e)}
         )
+
+
+# =============================================================================
+# TELEGRAM ROUTER
+# =============================================================================
+
+
+telegram_router = APIRouter(prefix="/webhooks", tags=["Telegram"])
 
 
 # =============================================================================

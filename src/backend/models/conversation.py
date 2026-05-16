@@ -1,37 +1,37 @@
 """
 SC Chatbot Conversation Model
 
-Conversation history model for multi-tenant support.
+Conversation management model.
 """
 
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
 from sqlalchemy.orm import relationship
 
-from database import Base, get_db_session
 
-
-class Conversation(Base):
-    """Represents a chat conversation session."""
+class Conversation:
+    """Represents a conversation in a chat session."""
     
     __tablename__ = "conversations"
     
     id = Column(Integer, primary_key=True, index=True)
     tenant_id = Column(Integer, ForeignKey('tenants.id'), nullable=False)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    
-    # Conversation metadata
-    title = Column(String(255), nullable=True, comment="Auto-generated title")
-    channel = Column(String(50), nullable=True, comment="Zalo, Facebook, Instagram, etc.")
-    
-    # Status
-    is_active = Column(Boolean, default=True)
-    last_message_at = Column(DateTime, nullable=True)
-    
-    # Timestamps
-    created_at = Column(DateTime, default=lambda: __import__('datetime').datetime.utcnow())
-    updated_at = Column(DateTime, default=lambda: __import__('datetime').datetime.utcnow(), onupdate=lambda: __import__('datetime').datetime.utcnow())
+    title = Column(String(255), default="", comment="Conversation title")
     
     # Relationships
     tenant = relationship("Tenant", back_populates="conversations")
-    user = relationship("User", back_populates="conversations")
     messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan")
+    
+    def __init__(self, tenant_id: int, title: str = ""):
+        self.tenant_id = tenant_id
+        self.title = title
+
+    def to_dict(self):
+        """Convert to dictionary."""
+        return {
+            "id": self.id,
+            "tenant_id": self.tenant_id,
+            "title": self.title
+        }
+
+    def __repr__(self):
+        return f"<Conversation(title='{self.title}')>"

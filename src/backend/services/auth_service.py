@@ -1,219 +1,157 @@
 """
 SC Chatbot Authentication Service
 
-JWT-based authentication and authorization service.
+JWT token-based authentication for the chatbot platform.
 """
 
-from typing import Dict, Any, Optional
-from datetime import datetime, timedelta
+import sys
+import os
+
+# Add backend root to path for absolute imports
+backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if backend_root not in sys.path:
+    sys.path.insert(0, backend_root)
+
 import jwt
-import bcrypt
-from functools import wraps
+import secrets
+from datetime import datetime, timedelta
+from typing import Optional, Dict
 
-from ..models.tenant import Tenant
-from ..models.user import User, UserRole
+import models.database as db_model
+import models.user as user_model
 
 
-class AuthService:
-    """Authentication service for SC Chatbot."""
+# Get JWT settings from environment or use defaults
+def get_jwt_settings():
+    """Get JWT configuration."""
+    secret = os.environ.get("JWT_SECRET_KEY", "your-secret-key-change-in-production")
+    algorithm = os.environ.get("JWT_ALGORITHM", "HS256")
+    expiration_minutes = int(os.environ.get("JWT_EXPIRY_MINUTES", 60))
     
-    SECRET_KEY = "your-secret-key-here-change-in-production"
-    ALGORITHM = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES = 30
+    return {
+        "secret": secret,
+        "algorithm": algorithm,
+        "expiration": timedelta(minutes=expiration_minutes),
+    }
+
+
+settings = get_jwt_settings()
+
+
+def verify_token(token: str) -> Optional[Dict]:
+    """
+    Verify JWT token and decode claims.
     
-    @staticmethod
-    def hash_password(password: str) -> str:
-        """Hash password using bcrypt."""
-        salt = bcrypt.gensalt()
-        hashed = bcrypt.hashpw(password.encode(), salt)
-        return hashed.decode()
+    Args:
+        token: JWT token to verify
     
-    @staticmethod
-    def verify_password(plain_password: str, hashed_password: str) -> bool:
-        """Verify password against hash."""
-        return bcrypt.checkpw(
-            plain_password.encode(),
-            hashed_password.encode(),
+    Returns:
+        Dictionary of claims or None if invalid
+    """
+    try:
+        payload = jwt.decode(
+            token,
+            settings["secret"],
+            algorithms=[settings["algorithm"]]
         )
+        return payload
+    except jwt.ExpiredSignatureError:
+        return None
+    except jwt.InvalidTokenError:
+        return None
+    except Exception:
+        return None
+
+
+def verify_token_from_header(request):
+    """
+    Extract and verify JWT token from Authorization header.
     
-    @staticmethod
-    def create_access_token(data: Dict[str, Any]) -> str:
-        """Create JWT access token."""
-        to_encode = {
-            "sub": data.get("sub", ""),
-            "email": data.get("email", ""),
-            "tenant_id": data.get("tenant_id", ""),
-            "tenant_key": data.get("tenant_key", ""),
-            "role": data.get("role", ""),
-            "exp": datetime.utcnow() + timedelta(minutes=30),
-        }
-        return jwt.encode(to_encode, AuthService.SECRET_KEY, Algorithm=AuthService.ALGORITHM)
+    Args:
+        request: HTTP request object
     
-    @staticmethod
-    def create_refresh_token(data: Dict[str, Any]) -> str:
-        """Create JWT refresh token."""
-        to_encode = {
-            "sub": data.get("sub", ""),
-            "email": data.get("email", ""),
-            "tenant_id": data.get("tenant_id", ""),
-            "tenant_key": data.get("tenant_key", ""),
-            "role": data.get("role", ""),
-            "exp": datetime.utcnow() + timedelta(days=7),
-        }
-        return jwt.encode(to_encode, AuthService.SECRET_KEY, Algorithm=AuthService.ALGORITHM)
+    Returns:
+        Decoded claims or None
+    """
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        return None
     
-    @staticmethod
-    def verify_token(token: str) -> Optional[Dict[str, Any]]:
-        """Verify JWT token and return payload."""
-        try:
-            payload = jwt.decode(token, AuthService.SECRET_KEY, algorithms=[AuthService.ALGORITHM])
-            return {
-                "sub": payload.get("sub"),
-                "email": payload.get("email"),
-                "tenant_id": payload.get("tenant_id"),
-                "tenant_key": payload.get("tenant_key"),
-                "role": payload.get("role"),
-            }
-        except jwt.ExpiredSignatureError:
-            return None
-        except jwt.InvalidTokenError:
-            return None
-    
-    @staticmethod
-    def create_user(
-        email: str,
-        hashed_password: str,
-        role: str = UserRole.AGENT.value,
-        tenant_id: int = None,
-    ) -> User:
-        """Create a new user."""
-        from ..models.user import User, UserRole as EnumRole
-        
-        user = User(
-            email=email,
-            hashed_password=hashed_password,
-            role=EnumRole(role),
-            tenant_id=tenant_id,
-        )
-        return user
-    
-    @staticmethod
-    async def create_tenant(
-        tenant_key: str,
-        name: str,
-        email: str,
-        password: str,
-    ) -> Dict[str, Any]:
-        """Create a new tenant with initial admin user."""
-        from ..models.tenant import Tenant
-        from ..models.database import get_db_session
-        
-        # Generate API key
-        import secrets
-        api_key = secrets.token_urlsafe(32)
-        
-        # Create tenant
-        tenant = Tenant(
-            tenant_key=tenant_key.lower(),
-            name=name,
-            api_key=api_key,
-        )
-        
-        # Hash password
-        hashed_pw = AuthService.hash_password(password)
-        
-        # Create admin user
-        admin_user = AuthService.create_user(
-            email=email,
-            hashed_password=hashed_pw,
-            role=UserRole.ADMIN.value,
-            tenant_id=tenant.id,
-        )
-        
-        async with get_db_session() as session:
-            session.add(tenant)
-            session.add(admin_user)
-            session.commit()
-        
-        return {
-            "tenant_key": tenant.tenant_key,
-            "api_key": api_key,
-            "email": admin_user.email,
-            "role": UserRole.ADMIN.value,
-        }
-    
-    @staticmethod
-    async def authenticate_user(
-        tenant_key: str,
-        email: str,
-        password: str,
-    ) -> Optional[Dict[str, Any]]:
-        """Authenticate user and return token payload."""
-        from ..models.tenant import Tenant
-        from ..models.database import get_db_session
-        
-        # Get tenant
-        async with get_db_session() as session:
-            tenant = session.query(Tenant).filter(
-                Tenant.tenant_key == tenant_key,
-            ).first()
-            
-            if not tenant:
-                return None
-            
-            # Find user
-            user = session.query(User).filter(
-                User.email == email,
-                User.tenant_id == tenant.id,
-            ).first()
-            
-            if not user or not AuthService.verify_password(password, user.hashed_password):
-                return None
-            
-            return {
-                "sub": str(user.id),
-                "email": user.email,
-                "tenant_id": str(tenant.id),
-                "tenant_key": tenant.tenant_key,
-                "role": user.role.value,
-                "access_token": AuthService.create_access_token({
-                    "sub": str(user.id),
-                    "email": user.email,
-                    "tenant_id": str(tenant.id),
-                    "tenant_key": tenant.tenant_key,
-                    "role": user.role.value,
-                }),
-                "refresh_token": AuthService.create_refresh_token({
-                    "sub": str(user.id),
-                    "email": user.email,
-                    "tenant_id": str(tenant.id),
-                    "tenant_key": tenant.tenant_key,
-                    "role": user.role.value,
-                }),
-            }
-    
-    @staticmethod
-    async def get_current_user(token: str) -> Optional[Dict[str, Any]]:
-        """Get current user from token."""
-        payload = AuthService.verify_token(token)
-        if not payload:
+    # Expect format: "Bearer <token>"
+    try:
+        parts = auth_header.split()
+        if len(parts) != 2 or parts[0] != "Bearer":
             return None
         
-        from ..models.tenant import Tenant
-        from ..models.database import get_db_session
-        
-        async with get_db_session() as session:
-            tenant = session.query(Tenant).filter(
-                Tenant.tenant_key == payload.get("tenant_key"),
-            ).first()
-            
-            if not tenant:
-                return None
-            
-            return {
-                "sub": payload.get("sub"),
-                "email": payload.get("email"),
-                "tenant_id": str(tenant.id),
-                "tenant_key": tenant.tenant_key,
-                "role": payload.get("role"),
-            }
+        token = parts[1]
+        return verify_token(token)
+    except Exception:
+        return None
+
+
+def create_access_token(
+    data: dict,
+    expires_delta: Optional[timedelta] = None,
+) -> str:
+    """
+    Create JWT access token.
+    
+    Args:
+        data: Claims to include in token
+        expires_delta: Optional additional expiration time
+    
+    Returns:
+        JWT token string
+    """
+    payload = data.copy()
+    
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + settings["expiration"]
+    
+    payload.update({
+        "exp": expire,
+        "iat": datetime.utcnow(),
+    })
+    
+    return jwt.encode(
+        payload,
+        settings["secret"],
+        algorithm=settings["algorithm"]
+    )
+
+
+def create_refresh_token(
+    data: dict,
+    expires_delta: Optional[timedelta] = None,
+) -> str:
+    """
+    Create JWT refresh token (longer expiration).
+    
+    Args:
+        data: Claims to include in token
+        expires_delta: Optional additional expiration time
+    
+    Returns:
+        JWT token string
+    """
+    payload = data.copy()
+    
+    # Refresh tokens typically last 7 days
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(days=7)
+    
+    payload.update({
+        "exp": expire,
+        "iat": datetime.utcnow(),
+        "type": "refresh",
+    })
+    
+    return jwt.encode(
+        payload,
+        settings["secret"],
+        algorithm=settings["algorithm"]
+    )

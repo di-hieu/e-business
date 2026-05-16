@@ -4,17 +4,25 @@ SC Chatbot RAG Pipeline
 Retrieval-Augmented Generation implementation.
 """
 
+import sys
+import os
+
+# Add backend root to path for absolute imports
+backend_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if backend_root not in sys.path:
+    sys.path.insert(0, backend_root)
+
 from typing import List, Dict, Any
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain.chains import RetrievalQA
-from langchain.prompts import ChatPromptTemplate
+from langchain_classic.chains import RetrievalQA
+from langchain_classic.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from datetime import datetime
 
-from ..models.database import get_db_session
-from ..models.knowledge import KnowledgeDocument
+from models.database import get_db_session
+from models.knowledge import KnowledgeDocument
 
 
 class RAGPipeline:
@@ -37,10 +45,9 @@ class RAGPipeline:
     async def load_knowledge(self):
         """Load knowledge documents into vector store."""
         async with get_db_session() as session:
-            documents = session.query(KnowledgeDocument).filter(
-                KnowledgeDocument.tenant_id == self.tenant_id,
-                KnowledgeDocument.is_active == True,
-                KnowledgeDocument.is_processed == True,
+            documents = session.query("KnowledgeDocument").filter(
+                "KnowledgeDocument.tenant_id = ? AND KnowledgeDocument.is_active",
+                [self.tenant_id],
             ).all()
         
         # Create chunks

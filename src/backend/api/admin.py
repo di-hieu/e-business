@@ -9,14 +9,13 @@ from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 
-from ..models.tenant import Tenant
-from ..models.user import User
-from ..models.conversation import Conversation
-from ..models.message import Message
-from ..models.knowledge import KnowledgeDocument
-from ..models.tool import ToolDefinition
-from ..services.auth_service import AuthService
-from ..models.database import get_db_session
+from backend.models.tenant import Tenant
+from backend.models.user import User
+from backend.models.conversation import Conversation
+from backend.models.message import Message
+from backend.models.knowledge import KnowledgeDocument
+from backend.models.tool import ToolDefinition
+from backend.models.database import get_db_session
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 

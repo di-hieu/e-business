@@ -5,10 +5,9 @@ User authentication and authorization model.
 """
 
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import relationship
 from enum import Enum as SQLEnum
-
-from .tenant import Tenant
 
 
 class UserRole(SQLEnum):

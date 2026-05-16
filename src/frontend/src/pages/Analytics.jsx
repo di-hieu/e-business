@@ -86,7 +86,7 @@ export default function Analytics({ onLogout }) {
 
             <div style={{ marginTop: '20px', background: '#e8f5e9', padding: '15px', borderRadius: '8px' }}>
               <div style={{ fontWeight: '600' }}>✅ SLA Status: 99.9% uptime</div>
-              <div style={{ fontSize: '0.85rem', color: '#666' }}>p95 response time: < 500ms</div>
+              <div style={{ fontSize: '0.85rem', color: '#666' }}>p95 response time: &lt; 500ms</div>
             </div>
           </div>
         )}

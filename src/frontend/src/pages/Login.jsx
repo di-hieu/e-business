@@ -14,14 +14,14 @@ export default function Login() {
     setError('')
 
     try {
-      const data = await api.post('/auth/login', {
+      const response = await api.post('/auth/login', {
         tenant_key: tenantKey,
         email,
         password,
       })
 
-      localStorage.setItem('access_token', data.data.access_token)
-      localStorage.setItem('refresh_token', data.data.refresh_token)
+      localStorage.setItem('access_token', response.data.access_token)
+      localStorage.setItem('refresh_token', response.data.refresh_token)
 
       navigate('/dashboard')
     } catch (err) {

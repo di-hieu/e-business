@@ -8,7 +8,9 @@ export default function Dashboard({ onLogout }) {
 
   const loadConversations = async () => {
     try {
-      const data = await api.get('/conversations')
+      const data = await api.get('/api/admin/conversations', {
+        params: { tenant_key: '', api_key: '' },
+      })
       setConversations(data.data)
     } catch (err) {
       console.error('Failed to load conversations:', err)
@@ -27,54 +29,6 @@ export default function Dashboard({ onLogout }) {
       <div style={{ width: '250px', background: '#1e1e2d', color: 'white', padding: '20px' }}>
         <h2 style={{ marginBottom: '30px' }}>SC Chatbot</h2>
         
-        <nav>
-          <button
-            onClick={() => setActiveTab('conversations')}
-            style={{
-              width: '100%',
-              padding: '10px',
-              textAlign: 'left',
-              background: 'none',
-              border: 'none',
-              color: 'white',
-              cursor: 'pointer',
-              borderBottom: '1px solid rgba(255,255,255,0.1)',
-            }}
-          >
-            💬 Conversations
-          </button>
-          <button
-            onClick={() => setActiveTab('knowledge')}
-            style={{
-              width: '100%',
-              padding: '10px',
-              textAlign: 'left',
-              background: 'none',
-              border: 'none',
-              color: 'white',
-              cursor: 'pointer',
-              borderBottom: '1px solid rgba(255,255,255,0.1)',
-            }}
-          >
-            📚 Knowledge
-          </button>
-          <button
-            onClick={() => setActiveTab('tools')}
-            style={{
-              width: '100%',
-              padding: '10px',
-              textAlign: 'left',
-              background: 'none',
-              border: 'none',
-              color: 'white',
-              cursor: 'pointer',
-              borderBottom: '1px solid rgba(255,255,255,0.1)',
-            }}
-          >
-            🔧 Tools
-          </button>
-        </nav>
-
         <button
           onClick={onLogout}
           style={{
@@ -96,40 +50,36 @@ export default function Dashboard({ onLogout }) {
       <div style={{ flex: 1, padding: '20px' }}>
         <div style={{ maxWidth: '800px' }}>
           <h1>Dashboard</h1>
-
+          
           {activeTab === 'conversations' && (
             <div>
               {loading ? (
                 <p>Loading conversations...</p>
               ) : (
                 <div style={{ display: 'grid', gap: '10px' }}>
-                  {conversations.length === 0 ? (
-                    <p>No conversations yet.</p>
-                  ) : (
-                    conversations.map((conv) => (
-                      <div
-                        key={conv.id}
-                        onClick={() => {}}
-                        style={{
-                          padding: '15px',
-                          background: '#fff',
-                          borderRadius: '8px',
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <div style={{ fontWeight: '600' }}>{conv.title || 'New conversation'}</div>
-                        <div style={{ fontSize: '0.85rem', color: '#666' }}>
-                          {conv.channel || 'General'} · {new Date(conv.created_at).toLocaleString()}
-                        </div>
+                  {conversations.map((conv, index) => (
+                    <div
+                      key={`conv-${index}`}
+                      onClick={() => {}}
+                      style={{
+                        padding: '15px',
+                        background: '#fff',
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <div style={{ fontWeight: '600' }}>{conv.title || 'New conversation'}</div>
+                      <div style={{ fontSize: '0.85rem', color: '#666' }}>
+                        {conv.channel || 'General'} · {new Date(conv.created_at).toLocaleString()}
                       </div>
-                    ))
-                  )}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
           )}
-
+          
           {activeTab === 'knowledge' && (
             <div>
               <h2>Knowledge Base</h2>
@@ -139,7 +89,7 @@ export default function Dashboard({ onLogout }) {
               </button>
             </div>
           )}
-
+          
           {activeTab === 'tools' && (
             <div>
               <h2>Tools</h2>

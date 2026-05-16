@@ -4,13 +4,11 @@ SC Chatbot Chat Session Model
 Chat session for managing LLM state.
 """
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, JSON
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, JSON, Float
 from sqlalchemy.orm import relationship
 
-from database import Base, get_db_session
 
-
-class ChatSession(Base):
+class ChatSession:
     """Represents a chat session with state and history."""
     
     __tablename__ = "chat_sessions"
@@ -32,3 +30,26 @@ class ChatSession(Base):
     
     # Relationships
     conversation = relationship("Conversation", back_populates="messages")
+    
+    def __init__(self, conversation_id: int, state: dict = None, model_name: str = None,
+                 temperature: float = None):
+        self.conversation_id = conversation_id
+        self.state = state or {}
+        self.model_name = model_name
+        self.temperature = temperature
+
+    def to_dict(self):
+        """Convert to dictionary."""
+        return {
+            "id": self.id,
+            "conversation_id": self.conversation_id,
+            "state": self.state,
+            "history": self.history,
+            "model_name": self.model_name,
+            "temperature": self.temperature,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at
+        }
+
+    def __repr__(self):
+        return f"<ChatSession(conversation_id={self.conversation_id})>"

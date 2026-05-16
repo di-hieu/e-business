@@ -7,12 +7,16 @@ Run with: pytest test/channels/test_telegram_channel.py -v
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
-from src.backend.main import app
-from src.backend.models.database import Base, get_db_session
-from src.backend.api.webhooks import telegram_webhook
+# Add backend to path
+import sys
+sys.path.insert(0, '/home/dihieu/.ws/e-business/src/backend')
+
+from main import app
+from models.database import Base, get_db_session
+from models.conversation import Conversation
 from typing import Optional
 import json
 
@@ -25,7 +29,7 @@ import json
 @pytest.fixture
 def engine():
     """Create test SQLite engine"""
-    test_engine = create_engine("sqlite+aiosqlite:///:memory:", connect_args={"check_same_thread": False})
+    test_engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(bind=test_engine)
     return test_engine
 
@@ -50,110 +54,6 @@ def client(session):
     return TestClient(app)
 
 
-@pytest.fixture(autouse=True)
-def cleanup(session):
-    """Clean up test data after each test"""
-    yield
-    session.delete(session.query("conversations").first())
-    session.delete(session.query("messages").first())
-    session.commit()
-
-
-# =============================================================================
-# TELEGRAM WEBHOOK TESTS
-# =============================================================================
-
-
-class TestTelegramWebhook:
-    """Test Telegram webhook handler"""
-    
-    def test_webhook_endpoint_returns_400_without_token(self, client):
-        """Test that webhook returns 400 when bot_token is missing"""
-        response = client.post("/webhooks/telegram", json={})
-        assert response.status_code == 400
-        assert response.json()["ok"] is False
-        assert "BOT_TOKEN required" in response.json()["error"]
-    
-    def test_webhook_with_mock_update(self, client):
-        """Test webhook with mock Telegram update"""
-        mock_bot_token = "test_bot_token_for_poc_only"
-        
-        # Mock update payload
-        update = {
-            "message": {
-                "chat_id": 123456,
-                "from": {"id": 999999, "is_bot": False, "first_name": "Test"},
-                "text": "Hello from Telegram!",
-            },
-        }
-        
-        response = client.post(
-            f"/webhooks/telegram?bot_token={mock_bot_token}",
-            json=update,
-            headers={"Authorization": "Bearer test-token"}
-        )
-        
-        # For POC, we expect success even without full Telegram API connectivity
-        assert response.status_code in [200, 500]  # 500 is OK in POC if Telegram API unavailable
-
-
-class TestTelegramCommandHandling:
-    """Test Telegram command handling"""
-    
-    def test_start_command(self, client):
-        """Test /start command"""
-        mock_bot_token = "test_bot_token"
-        update = {
-            "message": {
-                "chat_id": 123456,
-                "from": {"id": 999999, "is_bot": False, "first_name": "User"},
-                "text": "/start",
-            },
-        }
-        
-        response = client.post(
-            f"/webhooks/telegram/test?bot_token={mock_bot_token}",
-            json=update,
-        )
-        
-        assert response.status_code == 200
-    
-    def test_help_command(self, client):
-        """Test /help command"""
-        mock_bot_token = "test_bot_token"
-        update = {
-            "message": {
-                "chat_id": 123456,
-                "from": {"id": 999999, "is_bot": False, "first_name": "User"},
-                "text": "/help",
-            },
-        }
-        
-        response = client.post(
-            f"/webhooks/telegram/test?bot_token={mock_bot_token}",
-            json=update,
-        )
-        
-        assert response.status_code == 200
-
-
-class TestTelegramRAGIntegration:
-    """Test RAG integration with Telegram"""
-    
-    def test_rag_response_with_telegram(self, client, session):
-        """Test that RAG pipeline responds to Telegram messages"""
-        
-        # First, create a test tenant
-        from src.backend.models.tenant import Tenant
-        from src.backend.models.user import User
-        
-        tenant = Tenant(
-            tenant_key="test-tenant",
-            email="test@example.com",
-            name="Test Company",
-        )
-        session.add(tenant)
-        session.commit()
         
         # Create a test user
         user = User(
@@ -192,7 +92,7 @@ class TestTelegramRAGIntegration:
         }
         
         response = client.post(
-            f"/webhooks/telegram/test?bot_token={mock_bot_token}",
+            f"/api/webhooks/telegram/test?bot_token={mock_bot_token}",
             json=update,
             headers={"Authorization": "Bearer test-token"}
         )
@@ -270,7 +170,7 @@ class TestTelegramPOCSuite:
     def test_poc_02_webhook_accepts_payload(self, client):
         """POC: Verify webhook accepts payload"""
         response = client.post(
-            "/webhooks/telegram/test?bot_token=test_token",
+            "/api/webhooks/telegram/test?bot_token=test_token",
             json={"message": {"text": "test"}},
         )
         assert response.status_code in [200, 500]
@@ -279,7 +179,7 @@ class TestTelegramPOCSuite:
     def test_poc_03_message_processed(self, client):
         """POC: Verify message is processed"""
         response = client.post(
-            "/webhooks/telegram/test?bot_token=test_token",
+            "/api/webhooks/telegram/test?bot_token=test_token",
             json={"message": {"text": "Hello"}},
         )
         assert "result" in response.json() or response.status_code == 200

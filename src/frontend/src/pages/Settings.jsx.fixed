@@ -1,0 +1,108 @@
+import { useState, useEffect } from 'react'
+import { api } from '../api/client'
+
+export default function Settings({ onLogout }) {
+  const [loading, setLoading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [variables, setVariables] = useState({})
+
+  const loadConfig = async () => {
+    try {
+      const response = await api.get('/api/config/variables', {
+        params: { tenant_key: '', api_key: '' },
+      })
+      const allVariables = response.data
+      
+      // Reorganize data into categories for display
+      const grouped = {}
+      for (const v of allVariables) {
+        if (!grouped[v._category]) {
+          grouped[v._category] = []
+        }
+        grouped[v._category].push(v)
+      }
+      
+      setVariables(grouped)
+      setLoading(false)
+    } catch (err) {
+      console.error('Failed to load config:', err)
+      setLoading(false)
+    }
+  }
+
+  const handleUpdateConfig = async (key, value) => {
+    try {
+      setSubmitting(true)
+      setVariables(prev => ({
+        ...prev,
+        [key]: { ...prev[key], current_value: value }
+      }))
+
+      const response = await api.post('/api/config/variables', {
+        tenant_key: '',
+        api_key: '',
+        key,
+        value,
+      })
+
+      if (response.status === 201) {
+        // Reload data to show updated values
+        await loadConfig()
+      }
+    } catch (err) {
+      console.error('Failed to save config:', err)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const getDescription = (key) => {
+    const descMap = {
+      'LLM_API_KEY': 'OpenAI API key or OpenRouter API key for LLM access',
+      'LLM_MODEL': 'LLM model to use (gpt-4o-mini, gpt-4o, claude-3-5-sonnet, etc.)',
+      'EMBEDDING_MODEL': 'Embedding model for vector search (e.g., all-MiniLM-L6-v2)',
+      'TELEGRAM_BOT_TOKEN': 'Telegram Bot token from @BotFather',
+      'TELEGRAM_WEBHOOK_URL': 'Telegram webhook URL',
+      'ZALO_APP_ID': 'Zalo Official Account App ID',
+      'ZALO_APP_SECRET': 'Zalo Official Account App Secret',
+      'FACEBOOK_APP_ID': 'Facebook Messenger App ID',
+      'FACEBOOK_APP_SECRET': 'Facebook Messenger App Secret',
+      'INSTAGRAM_ACCESS_TOKEN': 'Instagram access token',
+      'OPENROUTER_API_KEY': 'OpenRouter API key for multi-model support',
+    }
+    return descMap[key] || 'Configuration option'
+  }
+
+  useEffect(() => {
+    loadConfig()
+  }, [])
+
+  return (<div style={{ minHeight: '100vh', display: 'flex' }}>
+    <div style={{ width: '280px', background: '#1e1e2d', color: 'white', padding: '20px' }}>
+      <h2 style={{ marginBottom: '30px' }}>SC Chatbot</h2>
+      <button onClick={onLogout} style={{ width: '100%', padding: '10px', background: '#d32f2f', border: 'none', borderRadius: '6px', color: 'white', cursor: 'pointer' }}>Logout</button>
+    </div>
+
+    <div style={{ flex: 1, padding: '20px' }}>
+      <h1>Environment Configuration</h1>
+      <p style={{ color: '#666', marginBottom: '20px' }}>Configure your application settings. Sensitive values are hidden.</p>
+
+      {Object.keys(variables).length === 0 && (
+        <div style={{ padding: '15px', background: '#e3f2fd', borderRadius: '8px', border: '1px solid #90caf9' }}>
+          <p style={{ fontSize: '0.9rem', color: '#555' }}>
+            🔧 Using demo mode - no configuration saved to database yet.
+            Make sure to configure your actual API keys in production.
+          </p>
+        </div>
+      )}
+
+      {Object.keys(variables).length > 0 && (
+        <>
+          {Object.entries(variables).map(([category, v]) => (
+            <div key={category} style={{ marginTop: '20px' }}>
+              <h3 style={{ margin: '0 0 15px 0', fontSize: '0.95rem' }}>{category}</h3>
+              <div style={{ fontSize: '0.8rem', color: '#999', marginBottom: '15px' }}>
+                {v.length} configuration options
+              </div>
+              <div style={{ display: 'grid', gap: '12px', gridColumn: '1' }}>
+                {v.map(item => (

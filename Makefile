@@ -47,7 +47,8 @@ install:
 dev:
 	@echo "=== Starting backend development server ==="
 	@echo "   Visit http://localhost:8000/docs for API docs"
-	cd src/backend && uvicorn api.app:app --reload --host 0.0.0.0 --port 8000
+	@echo "   Press Ctrl+C to stop the server"
+	bash -c ". /home/dihieu/.miniconda3/bin/activate base && cd src/backend && uvicorn main:app --reload --host 0.0.0.0 --port 8000"
 	@echo "=== Done ==="
 
 frontend:

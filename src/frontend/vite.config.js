@@ -7,6 +7,7 @@ export default defineConfig({
   define: {
     'process.env': process.env
   },
+// Add /config proxy route
   server: {
     port: 3000,
     proxy: {
@@ -17,7 +18,39 @@ export default defineConfig({
       '/docs': {
         target: 'http://localhost:8000',
         changeOrigin: true
-      }
+      },
+      '/users': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
+      '/auth': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
+      '/knowledge': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
+      '/chat': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
+      '/settings': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
+      '/admin': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
+      '/config': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
+      '/webhooks': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
     }
   },
   build: {

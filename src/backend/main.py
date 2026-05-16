@@ -12,8 +12,6 @@ from fastapi.responses import JSONResponse
 import logging
 from pathlib import Path
 
-from api import api_router
-
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -82,10 +80,17 @@ async def metrics():
 
 
 # Mount static files
+static = StaticFiles(directory=str(Path(__file__).parent.parent / "frontend" / "dist"))
+
 @app.get("/static/{path:path}")
 async def serve_static(path: str):
     """Serve static files."""
-    return StaticFiles().dispatch(request, path)
+    return static.dispatch(request, path)
+
+
+# Import and include API routes
+from api import api_router
+app.include_router(api_router, prefix="/api")
 
 
 if __name__ == "__main__":
